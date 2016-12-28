@@ -3,6 +3,7 @@
 
 from zazo import main
 
+
 def test_main(capsys):
     retval = main()
 
