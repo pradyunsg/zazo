@@ -1,0 +1,4 @@
+pytest-catchlog
+pytest-timeout
+pytest
+mock == 1.1.0

@@ -4,3 +4,7 @@ include LICENSE
 # Documentation
 recursive-include docs Makefile *.rst *.py
 prune docs/build
+
+# Testing
+exclude tox.ini
+exclude test-requirements.txt
