@@ -12,3 +12,6 @@ exclude test-requirements.txt
 # Continuous integration
 prune .travis
 exclude .travis.yml
+
+# Remove testing files
+prune tests
