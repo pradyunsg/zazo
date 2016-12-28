@@ -1,2 +1,6 @@
 include *.md
 include LICENSE
+
+# Documentation
+recursive-include docs Makefile *.rst *.py
+prune docs/build
