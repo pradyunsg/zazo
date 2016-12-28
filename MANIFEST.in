@@ -8,3 +8,7 @@ prune docs/build
 # Testing
 exclude tox.ini
 exclude test-requirements.txt
+
+# Continuous integration
+prune .travis
+exclude .travis.yml
