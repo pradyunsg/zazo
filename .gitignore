@@ -1,0 +1,18 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg
+*.egg-info/
+
+# Unit test / coverage reports
+.tox/
+
+# Sphinx documentation
+docs/build/
