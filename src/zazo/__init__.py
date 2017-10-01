@@ -5,12 +5,14 @@ __version__ = "0.1.0.dev0"
 
 # Exit codes
 SUCCESS = 0
+if False:
+    from typing import Text
 
 
 def get_message():
+    # type: () -> Text
     """Returns a message that would be printed by main()
     """
-    # type: () -> Text
     return "Hello World!"
 
 
