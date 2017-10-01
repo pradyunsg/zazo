@@ -46,6 +46,6 @@ setup(
     ],
     author='Pradyun S. Gedam',
     author_email='pradyunsg@gmail.com',
-    packages=find_packages(exclude=["docs", "tests"]),
+    packages=find_packages(where="src", exclude=["docs", "tests"]),
     python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*',
 )
