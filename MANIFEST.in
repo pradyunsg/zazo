@@ -13,5 +13,4 @@ exclude tox.ini
 prune tests
 
 # Travis
-prune .travis
 exclude .travis.yml
