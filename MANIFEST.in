@@ -1,17 +1,17 @@
 include *.md
 include LICENSE
 
+# development-only files
+prune dev
+
 # Documentation
 recursive-include docs Makefile *.rst *.py
 prune docs/build
 
 # Testing
 exclude tox.ini
-exclude test-requirements.txt
+prune tests
 
-# Continuous integration
+# Travis
 prune .travis
 exclude .travis.yml
-
-# Remove testing files
-prune tests

@@ -1,0 +1,2 @@
+sphinx ~= 1.6.4
+sphinx_rtd_theme
