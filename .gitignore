@@ -13,6 +13,8 @@ dist/
 
 # Unit test / coverage reports
 .tox/
+.cache/
+.mypy_cache/
 
 # Sphinx documentation
 docs/build/
