@@ -161,7 +161,7 @@ texinfo_documents = [
         master_doc, 'zazo',
         u'zazo Documentation',
         author, 'zazo',
-        'A SAT solver written in pure Python',
+        'A Dependency resolver written in pure Python',
         'Miscellaneous'
     ),
 ]

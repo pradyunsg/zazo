@@ -29,7 +29,7 @@ setup(
     name="zazo",
     version=find_version("zazo", "__init__.py"),
     url="http://zazo.readthedocs.io",
-    description="A SAT solver written in pure Python",
+    description="A Dependency resolver written in pure Python",
     long_description=long_description,
     classifiers=[
         "License :: OSI Approved :: MIT License",

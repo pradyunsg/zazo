@@ -6,7 +6,7 @@
 zazo
 ====
 
-A SAT solver written in pure Python. Currently under development.
+A Dependency resolver written in pure Python. Currently under development.
 
 .. toctree::
    :maxdepth: 2
