@@ -1,7 +1,7 @@
 zazo
 ====
 
-A Dependency resolver written in pure Python. Currently under development.
+A Dependency Resolver written in Python. Currently under development.
 
 .. toctree::
    :maxdepth: 2

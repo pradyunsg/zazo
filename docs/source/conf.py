@@ -162,7 +162,7 @@ texinfo_documents = [
         master_doc, 'zazo',
         u'zazo Documentation',
         author, 'zazo',
-        'A Dependency resolver written in pure Python',
+        'A Dependency Resolver written in Python',
         'Miscellaneous'
     ),
 ]
