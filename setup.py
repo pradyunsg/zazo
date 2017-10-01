@@ -27,7 +27,7 @@ long_description = read('README.md')
 
 setup(
     name="zazo",
-    version=find_version("zazo", "__init__.py"),
+    version=find_version("src", "zazo", "__init__.py"),
     url="http://zazo.readthedocs.io",
     description="A Dependency resolver written in pure Python",
     long_description=long_description,
@@ -46,6 +46,7 @@ setup(
     ],
     author='Pradyun S. Gedam',
     author_email='pradyunsg@gmail.com',
+    package_dir={"": "src"},
     packages=find_packages(where="src", exclude=["docs", "tests"]),
     python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*',
 )
