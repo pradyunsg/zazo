@@ -31,6 +31,9 @@ setup(
     url="http://zazo.readthedocs.io",
     description="A Dependency Resolver written in Python",
     long_description=long_description,
+
+    license="MIT",
+    keywords=["zazo", "pip", "dependency resolution"],
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Development Status :: 1 - Planning",
@@ -46,8 +49,10 @@ setup(
     ],
     author='Pradyun S. Gedam',
     author_email='pradyunsg@gmail.com',
+
     package_dir={"": "src"},
     packages=find_packages(where="src", exclude=["docs", "tests"]),
     python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*',
     install_requires=['packaging', 'six'],
+    zip_safe=True,
 )
