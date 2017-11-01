@@ -15,6 +15,7 @@ dist/
 .tox/
 .cache/
 .mypy_cache/
+.hypothesis/
 
 # Sphinx documentation
 docs/build/
