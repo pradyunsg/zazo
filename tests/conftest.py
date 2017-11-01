@@ -6,7 +6,10 @@ from tests.lib.yaml_fixtures import YamlFixtureFile
 
 
 def pytest_collect_file(parent, path):
-    if path.ext == ".yaml" and "tests" in path.dirname:
+    # Mark non-index YAML files as YAML tests
+    if path.ext == ".yaml":
+        if path.basename.endswith(".index.yaml"):
+            return
         return YamlFixtureFile(path, parent)
 
 
@@ -25,12 +28,14 @@ def pytest_collection_modifyitems(items):
 
         # Mark the type of test
         module_root_dir = module_path.split(os.pathsep)[0]
-        if module_root_dir.startswith("integration"):
+        if module_root_dir.startswith("yaml"):
+            item.add_marker(pytest.mark.yaml)
+            # YAML tests are also integration tests
+            item.add_marker(pytest.mark.integration)
+        elif module_root_dir.startswith("integration"):
             item.add_marker(pytest.mark.integration)
         elif module_root_dir.startswith("unit"):
             item.add_marker(pytest.mark.unit)
-        elif module_root_dir.startswith("yaml"):
-            item.add_marker(pytest.mark.yaml)
         else:
             msg = "Unknown test type (filename = {0}, root_dir = {1})".format(
                 module_path, module_root_dir
