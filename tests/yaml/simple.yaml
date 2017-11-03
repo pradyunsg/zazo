@@ -1,0 +1,45 @@
+# Sanity Checks
+-
+  name: Compatible selected
+  index:
+    - A 1.0.0
+    - A 2.0.0
+    - B 1.0.0
+    - B 2.0.0
+  actions:
+    - install: A
+  results:
+    - graph: null
+      set:
+      # we want it installing the latest version
+      - A 2.0.0
+-
+  name: Dependencies explored
+  index:
+    - A 1.0.0; depends B
+    - B 1.0.0
+  actions:
+    - install: A
+  results:
+    - graph:
+      - A 1.0.0 -> B 1.0.0
+      set:
+      - A 1.0.0
+      - B 1.0.0
+-
+  name: Extra Depedencies Explored
+  index:
+    - name: A
+      version: 1.0.0
+      depends: []
+      extras:
+        extra: [B == 1.0.0]
+    - B 1.0.0
+  actions:
+    - install: A[extra]
+  results:
+    - graph:
+      - A 1.0.0 -> B 1.0.0
+      set:
+      - A 1.0.0
+      - B 1.0.0

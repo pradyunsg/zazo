@@ -1,0 +1,37 @@
+-
+  name: Resolvable Cycle with out-of-cycle Dependencies
+  index:
+    - A 1.0.0; depends B 1.0.0, C 1.0.0
+    - B 1.0.0; depends A 1.0.0, D 1.0.0
+    - C 1.0.0
+    - D 1.0.0
+  actions:
+    - install: A
+  results:
+    - graph:
+        - A 1.0.0 -> B 1.0.0
+        - B 1.0.0 -> A 1.0.0
+        - A 1.0.0 -> C 1.0.0
+        - B 1.0.0 -> D 1.0.0
+      set:
+        - A 1.0.0
+        - B 1.0.0
+        - C 1.0.0
+        - D 1.0.0
+-
+  name: Unresolvable Cycle
+  index:
+    - A 1.0.0; depends B 1.0.0
+    - B 1.0.0; depends A 2.0.0
+    - A 2.0.0; depends B 2.0.0
+    - B 2.0.0; depends A 1.0.0
+  actions:
+    - install: A
+  results:
+    - conflicts:
+      - have: A 2.0.0
+        want: A == 1.0.0 (B 2.0.0)
+      - have: A 1.0.0
+        want: A == 2.0.0 (B 1.0.0)
+
+# TODO: Should decide if there's more situations worth supporting
