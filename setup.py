@@ -29,7 +29,7 @@ setup(
     name="zazo",
     version=find_version("src", "zazo", "__init__.py"),
     url="http://zazo.readthedocs.io",
-    description="A Dependency Resolver written in Python",
+    description="An Extensible Dependency Resolver written in Python",
     long_description=long_description,
 
     license="MIT",
