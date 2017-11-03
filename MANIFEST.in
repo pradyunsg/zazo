@@ -2,7 +2,7 @@ include *.md
 include LICENSE
 
 # development-only files
-prune dev
+prune tools
 
 # Documentation
 recursive-include docs Makefile *.rst *.py
