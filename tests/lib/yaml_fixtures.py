@@ -19,7 +19,8 @@ class YamlFixtureFile(pytest.File):
     def collect(self):
         with self.fspath.open() as f:
             data = yaml.safe_load(f)
-        yield from self._compose_tests(data)
+        for test in self._compose_tests(data):
+            yield test
 
 
 # class YamlItem(pytest.Item):
