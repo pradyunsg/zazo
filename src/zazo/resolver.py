@@ -42,36 +42,30 @@ class BacktrackingResolver(object):
         current_req = requirements[0]
         requirements = requirements[1:]
 
-        logger.debug("Attempting to satisfy requirement: %s", current_req)
+        logger.debug("will attempt to satisfy: %s", current_req)
         if current_req.name in graph:
             # We have seen this requirement; check if we satisfy it already
             existing_candidate = graph[current_req.name]
-            logger.debug(
-                "  Already selected: %s", existing_candidate
-            )
+            logger.debug("  already selected: %s", existing_candidate)
             if not existing_candidate.matches(current_req):
-                logger.debug(
-                    "  Selected candidate does not match requirement."
-                )
+                logger.debug("    does not match requirement")
                 raise CannotSatisfy(current_req, existing_candidate)
             else:
-                logger.debug("  Selected candidate matches requirement.")
+                logger.debug("    does match requirement")
                 # Proceed to the next requirement
                 return self._resolve(requirements, graph)
         else:
-            logger.debug(
-                "  No selected candidate selected yet for %s.", current_req.name
-            )
+            logger.debug("  not selected yet: %s", current_req.name)
             candidates = self.provider.get_all_candidates(current_req)
             logger.debug(
-                "  Got %d candidates for %s.", len(candidates), current_req.name
+                "  candidate count: %d", len(candidates), current_req.name
             )
             for candidate in self.provider.order_candidates(candidates):
                 assert candidate.matches(current_req), (
                     "candidate does not match requirement it was guaranteed "
                     "to match"
                 )
-                logger.debug("  Selected: %s", candidate)
+                logger.debug("  selecting: %s", candidate)
 
                 graph[current_req.name] = candidate
                 dependencies = self.provider.fetch_dependencies(candidate)
