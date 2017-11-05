@@ -18,6 +18,8 @@ class Candidate(object):
     @abc.abstractmethod
     def matches(self, requirement):
         # type: (Requirement) -> bool
+        """Does this candidate match the given requirement?
+        """
         raise NotImplementedError("Method to be overridden in a subclass.")
 
 
@@ -29,9 +31,13 @@ class Provider(object):
     @abc.abstractmethod
     def get_candidates(self, requirement):
         # type: (Requirement) -> List[Candidate]
+        """Get all the candidates that match the given requirement.
+        """
         raise NotImplementedError("Method to be overridden in a subclass.")
 
     @abc.abstractmethod
     def fetch_dependencies(self, candidate):
         # type: (Candidate) -> List[Requirement]
+        """Fetch dependencies of the given candidate
+        """
         raise NotImplementedError("Method to be overridden in a subclass.")
