@@ -6,10 +6,7 @@ from tests.lib.yaml_fixtures import YamlFixtureFile
 
 
 def pytest_collect_file(parent, path):
-    # Mark non-index YAML files as YAML tests
     if path.ext == ".yaml":
-        if path.basename.endswith(".index.yaml"):
-            return
         return YamlFixtureFile(path, parent)
 
 
