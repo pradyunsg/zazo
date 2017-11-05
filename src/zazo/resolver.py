@@ -3,13 +3,13 @@
 
 import logging
 
-from packaging.requirements import Requirement
 
 from .exceptions import CannotSatisfy
 
-if False:  # mypy
-    from typing import List, Dict
-    from .abc import Provider, Candidate
+if False:
+    from typing import List, Dict  # NOQA
+    from packaging.requirements import Requirement  # NOQA
+    from .abc import Provider, Candidate  # NOQA
 
     Graph = Dict[str, Candidate]
 

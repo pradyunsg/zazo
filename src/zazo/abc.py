@@ -6,10 +6,10 @@ import abc
 
 from six import add_metaclass
 
-if False:  # mypy
-    from packaging.requirements import Requirement
-    from packaging.version import Version
-    from typing import List
+if False:
+    from packaging.requirements import Requirement  # NOQA
+    from packaging.version import Version  # NOQA
+    from typing import List  # NOQA
 
 
 @add_metaclass(abc.ABCMeta)
