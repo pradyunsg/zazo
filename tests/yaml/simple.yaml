@@ -18,6 +18,7 @@
   index:
     - A 1.0.0; depends B
     - B 1.0.0
+    - E 1.0.0
   actions:
     - install: A
   results:
@@ -35,6 +36,7 @@
       extras:
         extra: [B == 1.0.0]
     - B 1.0.0
+    - E 1.0.0
   actions:
     - install: A[extra]
   results:
