@@ -47,7 +47,7 @@ class BacktrackingResolver(object):
             # We have seen this requirement; check if we satisfy it already
             existing_candidate = graph[current_req.name]
             logger.debug(
-                "Checking already selected candidate: %s", existing_candidate
+                "  Already selected: %s", existing_candidate
             )
             if not existing_candidate.matches(current_req):
                 logger.debug(
@@ -60,13 +60,18 @@ class BacktrackingResolver(object):
                 return self._resolve(requirements, graph)
         else:
             logger.debug(
-                "No selected candidate selected yet for %s.", current_req.name
+                "  No selected candidate selected yet for %s.", current_req.name
             )
             candidates = self.provider.get_all_candidates(current_req)
-
+            logger.debug(
+                "  Got %d candidates for %s.", len(candidates), current_req.name
+            )
             for candidate in self.provider.order_candidates(candidates):
-                assert candidate.matches(current_req)
-                logger.debug("Trying candidate: %s", candidate)
+                assert candidate.matches(current_req), (
+                    "candidate does not match requirement it was guaranteed "
+                    "to match"
+                )
+                logger.debug("  Selected: %s", candidate)
 
                 graph[current_req.name] = candidate
                 dependencies = self.provider.fetch_dependencies(candidate)
