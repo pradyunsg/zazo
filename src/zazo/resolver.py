@@ -56,9 +56,9 @@ class BacktrackingResolver(object):
                 return self._resolve(requirements, graph)
         else:
             logger.debug("  not selected yet: %s", req.name)
-            candidates = self.provider.get_all_candidates(req)
+            candidates = self.provider.get_candidates(req)
             logger.debug("  candidate count: %d", len(candidates), req.name)
-            for candidate in self.provider.order_candidates(candidates):
+            for candidate in candidates:
                 assert candidate.matches(req), (
                     "candidate does not match requirement it was guaranteed "
                     "to match"

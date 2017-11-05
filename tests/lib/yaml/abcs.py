@@ -40,22 +40,16 @@ class YAMLProvider(Provider):
         super(YAMLProvider, self).__init__()
         self._candidates_by_name = data
 
-    def get_all_candidates(self, requirement):
+    def get_candidates(self, requirement):
         try:
-            items = self._candidates_by_name[requirement.name]
+            candidates = self._candidates_by_name[requirement.name]
         except KeyError:
             return []
 
-        new_copy = deepcopy(items)
-        for item in new_copy[:]:
-            if not item.matches(requirement):
-                new_copy.remove(item)
-        #     item._add_extras_requested(requirement.extras)
-
-        return new_copy
-
-    def order_candidates(self, candidates):
-        return reversed(sorted(candidates, key=lambda x: x.version))
+        return sorted(
+            filter(lambda x: x.matches(requirement), candidates),
+            key=lambda x: x.version
+        )[::-1]
 
     def fetch_dependencies(self, candidate):
         retval = candidate._dependencies[None]
