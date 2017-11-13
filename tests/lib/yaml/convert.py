@@ -7,7 +7,7 @@ from collections import defaultdict
 from random import shuffle
 
 from packaging.requirements import Requirement
-from packaging.version import Version
+from packaging.version import parse as parse_version
 
 from .abcs import YAMLCandidate
 from .exceptions import YAMLException
@@ -45,7 +45,7 @@ def convert_index_to_candidates(index):
                 depends = _split_and_strip(depends_str[len("depends "):], ",")
 
             name, version = _split_and_strip(name_version, " ", 1)
-            version = Version(version)
+            version = parse_version(version)
             dependencies = {None: [_make_req(string) for string in depends]}
 
             return YAMLCandidate(name, version, dependencies)
@@ -59,7 +59,7 @@ def convert_index_to_candidates(index):
             assert "version" in item, "index-item is not versioned"
             assert isinstance(item["version"], str), \
                 "index-item version is not a string"
-            version = Version(item["version"])
+            version = parse_version(item["version"])
 
             if "depends" in item:
                 assert (
@@ -148,7 +148,7 @@ def convert_result_and_expected_and_check(result, expected):
             if name not in result["chosen_set"]:
                 errors.append(name + " is missing.")
                 continue
-            if Version(version) != result["chosen_set"][name].version:
+            if parse_version(version) != result["chosen_set"][name].version:
                 errors.append("Expected {} to be version {}, got {}".format(
                     name, version, result["chosen_set"][name].version
                 ))
