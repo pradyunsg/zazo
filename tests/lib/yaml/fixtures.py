@@ -7,7 +7,7 @@ import traceback
 
 import yaml
 import pytest
-from packaging.requirements import Requirement
+from packaging.requirements import Requirement, InvalidRequirement
 
 from .abcs import YAMLProvider
 from .convert import (
@@ -25,12 +25,12 @@ class YamlFixtureItem(pytest.Item):
         self.spec = spec
 
     def _compose_requirements(self):
-        assert isinstance(self.spec["actions"], list)
-        assert isinstance(self.spec["results"], list)
+        assert isinstance(self.spec["actions"], list), "actions should be a list"
+        assert isinstance(self.spec["results"], list), "results should be a list"
         for action, result in zip(self.spec["actions"], self.spec["results"]):
 
-            assert isinstance(action, dict)
-            assert len(action) == 1
+            assert isinstance(action, dict), "an action should be a dict"
+            assert len(action) == 1, "an action should have a single item"
 
             verb = list(action.keys())[0]
             # FIXME: install, upgrade, uninstall are things we care about
@@ -39,16 +39,20 @@ class YamlFixtureItem(pytest.Item):
             req_str_list = action[verb]
             if isinstance(req_str_list, str):
                 req_str_list = [req_str_list]
-            assert isinstance(req_str_list, list)
-            requirements = [Requirement(r) for r in req_str_list]
-
+            assert isinstance(req_str_list, list), "requirements should be a string or list of strings"
+            try:
+                requirements = [Requirement(r) for r in req_str_list]
+            except InvalidRequirement:
+                raise YAMLException(
+                    "Got invalid requirement in {}", req_str_list
+                )
             yield requirements, result
 
     def runtest(self):
-        assert isinstance(self.spec, dict)
-        assert "index" in self.spec
-        assert "actions" in self.spec
-        assert "results" in self.spec
+        assert isinstance(self.spec, dict), "a test should be a dictionary"
+        assert "index" in self.spec, "there should be index in a test"
+        assert "actions" in self.spec, "there should be actions in a test"
+        assert "results" in self.spec, "there should be results in a test"
 
         # Create a Provider, using index
         provider = YAMLProvider(
@@ -72,22 +76,20 @@ class YamlFixtureItem(pytest.Item):
             # Format a reason
             if not excinfo.value.args:
                 message = "unknown"
+            elif len(excinfo.value.args) == 1:
+                message = excinfo.value.args[0]
             else:
-                if len(excinfo.value.args) == 1:
-                    message = excinfo.value.args[0]
-                else:
-                    try:
-                        message = excinfo.value.args[0].format(
-                            excinfo.value.args[1:]
-                        )
-                    except Exception:
-                        message = "Unable to format message: " + str(
-                            excinfo.value.args
-                        )
+                try:
+                    message = excinfo.value.args[0].format(
+                        *excinfo.value.args[1:]
+                    )
+                except Exception as e:
+                    message = "Unable to format message: " + str(excinfo.value.args)
+                    message += "\n" + str(e)
             # Print the reason
             return "YAML is malformed -- reason: {}".format(message)
         elif isinstance(excinfo.value, AssertionError):
-            msg = (": " + excinfo.value.args[0]) if excinfo.value.args else ""
+            msg = (": " + str(excinfo.value.args[0])) if excinfo.value.args else ""
             return "assertion failed" + msg
         else:
             trace = traceback.format_exception(
@@ -102,7 +104,7 @@ class YamlFixtureItem(pytest.Item):
 class YamlFixtureFile(pytest.File):
 
     def _compose_tests(self, data):
-        assert isinstance(data, list)
+        assert isinstance(data, list), "test data should be a list"
         for i, item in enumerate(data):
             name = "{}[{}]".format(self.fspath.basename, i)
             yield YamlFixtureItem(name, self, item)
