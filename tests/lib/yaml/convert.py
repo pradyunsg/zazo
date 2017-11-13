@@ -48,7 +48,9 @@ def convert_index_to_candidates(index):
 
             name, version = _split_and_strip(name_version, " ", 1)
             version = parse_version(version)
-            dependencies = {None: [_make_req(string, item) for string in depends]}
+            dependencies = {
+                None: [_make_req(string, item) for string in depends]
+            }
 
             return YAMLCandidate(name, version, dependencies)
 
@@ -80,7 +82,9 @@ def convert_index_to_candidates(index):
                 assert (
                     isinstance(item["extras"], dict) and
                     all(isinstance(x, str) for x in item["extras"].keys()) and
-                    all(isinstance(x, list) for x in item["extras"].values()) and
+                    all(
+                        isinstance(x, list) for x in item["extras"].values()
+                    ) and
                     all(
                         all(isinstance(y, str) for y in x)
                         for x in item["extras"].values()
@@ -142,7 +146,7 @@ def convert_result_and_expected_and_check(result, expected):
         # TODO: Beef this up; maybe try to show what's messed up.
     else:
         assert "set" in expected, "set not in expected"
-        if  "chosen_set" not in result:
+        if "chosen_set" not in result:
             message = "Expected to get resolved set, got conflicts"
             raise AssertionError(message)
 

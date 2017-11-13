@@ -25,10 +25,12 @@ class YamlFixtureItem(pytest.Item):
         self.spec = spec
 
     def _compose_requirements(self):
-        assert isinstance(self.spec["actions"], list), "actions should be a list"
-        assert isinstance(self.spec["results"], list), "results should be a list"
-        for action, result in zip(self.spec["actions"], self.spec["results"]):
+        assert isinstance(self.spec["actions"], list), \
+            "actions should be a list"
+        assert isinstance(self.spec["results"], list), \
+            "results should be a list"
 
+        for action, result in zip(self.spec["actions"], self.spec["results"]):
             assert isinstance(action, dict), "an action should be a dict"
             assert len(action) == 1, "an action should have a single item"
 
@@ -39,7 +41,11 @@ class YamlFixtureItem(pytest.Item):
             req_str_list = action[verb]
             if isinstance(req_str_list, str):
                 req_str_list = [req_str_list]
-            assert isinstance(req_str_list, list), "requirements should be a string or list of strings"
+            assert (
+                isinstance(req_str_list, list) and
+                all(isinstance(x, str) for x in req_str_list)
+            ), "requirements should be a string or list of strings"
+
             try:
                 requirements = [Requirement(r) for r in req_str_list]
             except InvalidRequirement:
@@ -84,12 +90,16 @@ class YamlFixtureItem(pytest.Item):
                         *excinfo.value.args[1:]
                     )
                 except Exception as e:
-                    message = "Unable to format message: " + str(excinfo.value.args)
-                    message += "\n" + str(e)
+                    message = "Unable to format message: {}\n{}".format(
+                        excinfo.value.args, e,
+                    )
             # Print the reason
             return "YAML is malformed -- reason: {}".format(message)
         elif isinstance(excinfo.value, AssertionError):
-            msg = (": " + str(excinfo.value.args[0])) if excinfo.value.args else ""
+            if excinfo.value.args:
+                msg = ": " + str(excinfo.value.args[0])
+            else:
+                msg = ""
             return "assertion failed" + msg
         else:
             trace = traceback.format_exception(
