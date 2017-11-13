@@ -156,9 +156,9 @@ def convert_result_and_expected_and_check(result, expected):
 
         # Make sure we got the right packages
         if result["chosen_set"]:
-            for key in result:
+            for key in result["chosen_set"]:
                 errors.append("Got unexpected selection: {} {}".format(
-                    key, result[key].version
+                    key, result["chosen_set"][key].version
                 ))
 
         # TODO: Check the graph of dependencies
