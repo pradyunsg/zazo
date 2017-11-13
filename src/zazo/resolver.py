@@ -1,8 +1,8 @@
 """
 """
 
+import inspect
 import logging
-
 
 from .exceptions import CannotSatisfy
 
@@ -25,6 +25,7 @@ class BackTrackingResolver(object):
 
     def resolve(self, requirements):
         # type: (List[Requirement]) -> Graph
+        self._initial_recursion_depth = len(inspect.stack())
         graph = {}  # type: Graph
         try:
             retval = self._resolve(requirements, graph)
@@ -42,38 +43,53 @@ class BackTrackingResolver(object):
         req = requirements[0]
         requirements = requirements[1:]
 
-        logger.debug("will attempt to satisfy: %s", req)
+        recursion_depth = len(inspect.stack()) - self._initial_recursion_depth
+        s = "  " * (recursion_depth - 1)
+
+        logger.debug(s + "will attempt to satisfy: %s", req)
         if req.name in graph:
             # We have seen this requirement; check if we satisfy it already
             existing_candidate = graph[req.name]
-            logger.debug("  already selected: %s", existing_candidate)
+            logger.debug(s + "  already selected: %s", existing_candidate)
             if not existing_candidate.matches(req):
-                logger.debug("    does not match requirement")
+                logger.debug(s + "    does not match requirement")
                 raise CannotSatisfy(req, existing_candidate)
             else:
-                logger.debug("    does match requirement")
+                logger.debug(s + "    does match requirement")
                 # Proceed to the next requirement
-                return self._resolve(requirements, graph)
+                try:
+                    retval = self._resolve(requirements, graph)
+                except CannotSatisfy:
+                    raise
+                else:
+                    logger.debug(
+                        s + "proceeding with existing selection %s",
+                        existing_candidate
+                    )
+                    return retval
         else:
-            logger.debug("  not selected yet: %s", req.name)
+            logger.debug(s + "  not selected yet: %s", req.name)
             candidates = self.provider.get_candidates(req)
-            logger.debug("  candidate count: %d", len(candidates), req.name)
+            logger.debug(s + "  candidate count: %d", len(candidates))
             for candidate in candidates:
                 assert candidate.matches(req), (
                     "candidate does not match requirement it was guaranteed "
                     "to match"
                 )
-                logger.debug("  selecting: %s", candidate)
+                logger.debug(s + "  selecting: %s", candidate)
 
                 graph[req.name] = candidate
                 dependencies = self.provider.fetch_dependencies(candidate)
                 try:
-                    return self._resolve(
+                    retval = self._resolve(
                         dependencies + requirements, graph.copy()
                     )
                 except CannotSatisfy:
                     assert graph[req.name] == candidate
                     del graph[req.name]
+                else:
+                    logger.debug(s + "proceeding with selection %s", candidate)
+                    return retval
 
             # If we are here, we could not satisfy the given requirements
             raise CannotSatisfy([req] + requirements, graph.copy())
