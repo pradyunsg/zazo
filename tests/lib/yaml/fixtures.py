@@ -14,7 +14,7 @@ from .convert import (
     convert_index_to_candidates, convert_result_and_expected_and_check
 )
 from .exceptions import YAMLException
-from zazo.api import BacktrackingResolver, CannotSatisfy
+from zazo.api import BackTrackingResolver, CannotSatisfy
 
 
 class YamlFixtureItem(pytest.Item):
@@ -57,7 +57,7 @@ class YamlFixtureItem(pytest.Item):
 
         for requirements, expected in self._compose_requirements():
             # Actual Testing Code
-            resolver = BacktrackingResolver(provider)
+            resolver = BackTrackingResolver(provider)
             try:
                 result = resolver.resolve(requirements)
             except CannotSatisfy as e:

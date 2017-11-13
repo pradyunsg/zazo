@@ -16,11 +16,11 @@ if False:
 logger = logging.getLogger()
 
 
-class BacktrackingResolver(object):
+class BackTrackingResolver(object):
 
     def __init__(self, provider):
         # type: (Provider) -> None
-        super(BacktrackingResolver, self).__init__()
+        super(BackTrackingResolver, self).__init__()
         self.provider = provider
 
     def resolve(self, requirements):
