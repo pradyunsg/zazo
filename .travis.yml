@@ -32,4 +32,4 @@ matrix:
 install:
   - travis_retry tools/travis/install.sh
 script:
-  - tools/travis/run.sh
+  - tox
