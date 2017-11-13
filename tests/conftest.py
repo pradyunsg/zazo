@@ -10,10 +10,13 @@ def pytest_collect_file(parent, path):
         return YamlFixtureFile(path, parent)
 
 
-def pytest_collection_modifyitems(items):
+def pytest_collection_modifyitems(session, config, items):
     # Mark Tests based on which directory they live in
     for item in items:
-        # We don't want to touch DoctestTextfile and others.
+        if isinstance(item, YamlFixtureFile):
+            item.add_marker(pytest.mark.yaml)
+            item.add_marker(pytest.mark.integration)
+
         if not hasattr(item, 'module'):
             continue
 
@@ -22,14 +25,9 @@ def pytest_collection_modifyitems(items):
             item.module.__file__,
             os.path.commonprefix([__file__, item.module.__file__]),
         )
-
         # Mark the type of test
         module_root_dir = module_path.split(os.pathsep)[0]
-        if module_root_dir.startswith("yaml"):
-            item.add_marker(pytest.mark.yaml)
-            # YAML tests are also integration tests
-            item.add_marker(pytest.mark.integration)
-        elif module_root_dir.startswith("integration"):
+        if module_root_dir.startswith("integration"):
             item.add_marker(pytest.mark.integration)
         elif module_root_dir.startswith("unit"):
             item.add_marker(pytest.mark.unit)
