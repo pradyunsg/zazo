@@ -33,7 +33,7 @@ class BackTrackingResolver(object):
             logger.debug("Unable to satisfy dependencies.")
             raise
         else:
-            logger.debug("Found satisfying set: %s.", retval)
+            logger.debug("Found satisfying set: %s", retval)
             return retval
 
     def _resolve(self, requirements, graph):
