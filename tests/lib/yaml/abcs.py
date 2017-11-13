@@ -23,8 +23,16 @@ class YAMLCandidate(Candidate):
             self.name, self.version, self._dependencies
         )
 
-    # def _add_extras_requested(self, other_extras):
-    #     self._extras_requested |= set(other_extras)
+    def _get_dependencies(self):
+        deps = deepcopy(self._dependencies)
+
+        retval = deps[None]
+        # for extra in self.extras:
+        #     if extra in deps:
+        #         for item in deps[extra]:
+        #             item.extras |= self.extras
+        #         retval.extend(deps[extra])
+        return retval
 
     def matches(self, requirement):
         return (
@@ -52,15 +60,6 @@ class YAMLProvider(Provider):
         )[::-1]
 
     def fetch_dependencies(self, candidate):
-        retval = candidate._dependencies[None]
-
-        # for extra in candidate._extras_requested:
-        #     if extra not in candidate._dependencies:
-        #         continue
-
-        #     items = deepcopy(candidate._dependencies[extra])
-        #     for item in items:
-        #         item.extras = item.extras.union(candidate._extras_requested)
-        #     retval.extend(items)
-
-        return retval
+        # The reason we've ended up doing this is because of us loading and
+        # storing dependency information in a candidate.
+        return candidate._get_dependencies()
