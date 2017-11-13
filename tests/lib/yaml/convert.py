@@ -23,15 +23,17 @@ def _split_and_strip(my_str, splitwith, count=None):
         return [x.strip() for x in my_str.strip().split(splitwith, count)]
 
 
-def _make_req(string):
+def _make_req(string, item):
     try:
         return Requirement(string)
     except Exception:
-        raise Exception("Could not parse requirement {}".format(string))
+        raise YAMLException(
+            "Could not parse requirement {!r} from {!r}", string, item
+        )
 
 
 def convert_index_to_candidates(index):
-    assert isinstance(index, list), index
+    assert isinstance(index, list), "index must be a list"
 
     def _parse_index_item(item):
         if isinstance(item, str):
@@ -42,11 +44,11 @@ def convert_index_to_candidates(index):
                 name_version, depends_str = _split_and_strip(item, ";", 1)
                 assert depends_str.startswith("depends "), \
                     "dependencies string must be specified with 'depends '"
-                depends = _split_and_strip(depends_str[len("depends "):], ",")
+                depends = _split_and_strip(depends_str[len("depends "):], "&")
 
             name, version = _split_and_strip(name_version, " ", 1)
             version = parse_version(version)
-            dependencies = {None: [_make_req(string) for string in depends]}
+            dependencies = {None: [_make_req(string, item) for string in depends]}
 
             return YAMLCandidate(name, version, dependencies)
 
@@ -67,7 +69,9 @@ def convert_index_to_candidates(index):
                     all(isinstance(x, str) for x in item["depends"])
                 ), "index-item depends should be a list of strings"
                 dependencies = {
-                    None: [_make_req(string) for string in item["depends"]]
+                    None: [
+                        _make_req(string, item) for string in item["depends"]
+                    ]
                 }
             else:
                 dependencies = {None: []}
@@ -84,7 +88,7 @@ def convert_index_to_candidates(index):
                 ), "index-item extras is not a Dict[str, List[str]]"
 
                 for k, v in item["extras"].items():
-                    dependencies[k] = [_make_req(string) for string in v]
+                    dependencies[k] = [_make_req(string, item) for string in v]
 
             return YAMLCandidate(name, version, dependencies)
         assert False, "should never reach here"

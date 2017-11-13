@@ -14,7 +14,8 @@ class YAMLCandidate(Candidate):
         self.version = version
         assert isinstance(dependencies, dict), \
             "Mapping of extras to requirements"
-        assert None in dependencies.keys()
+        assert None in dependencies.keys(), "improper dependencies"
+
         self._dependencies = dependencies
         # self._extras_requested = set()
 
