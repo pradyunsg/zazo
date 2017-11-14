@@ -89,9 +89,10 @@ class YamlFixtureItem(pytest.Item):
                     message = excinfo.value.args[0].format(
                         *excinfo.value.args[1:]
                     )
-                except Exception as e:
+                except Exception as error:
                     message = "Unable to format message: {}\n{}".format(
-                        excinfo.value.args, e,
+                        excinfo.value.args,
+                        error,
                     )
             # Print the reason
             return "YAML is malformed -- reason: {}".format(message)

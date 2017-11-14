@@ -80,12 +80,10 @@ def convert_index_to_candidates(index):
 
             if "extras" in item:
                 assert (
-                    isinstance(item["extras"], dict) and
-                    all(isinstance(x, str) for x in item["extras"].keys()) and
-                    all(
-                        isinstance(x, list) for x in item["extras"].values()
-                    ) and
-                    all(
+                    isinstance(item["extras"], dict) and all(
+                        isinstance(x[0], str) and isinstance(x[1], list)
+                        for x in item["extras"].items()
+                    ) and all(
                         all(isinstance(y, str) for y in x)
                         for x in item["extras"].values()
                     )
@@ -113,16 +111,12 @@ def convert_index_to_candidates(index):
 
 
 def _convert_error(result):
-    return {
-        "conflicts": []
-    }
+    return {"conflicts": []}
 
 
 def _convert_resolved_set(result):
     # TODO: Make this do some actual restructuring
-    return {
-        "chosen_set": result.copy()
-    }
+    return {"chosen_set": result.copy()}
 
 
 def convert_result_and_expected_and_check(result, expected):
@@ -157,17 +151,21 @@ def convert_result_and_expected_and_check(result, expected):
                 errors.append(name + " is missing.")
                 continue
             if parse_version(version) != result["chosen_set"][name].version:
-                errors.append("Expected {} to be version {}, got {}".format(
-                    name, version, result["chosen_set"][name].version
-                ))
+                errors.append(
+                    "Expected {} to be version {}, got {}".format(
+                        name, version, result["chosen_set"][name].version
+                    )
+                )
             del result["chosen_set"][name]
 
         # Make sure we got the right packages
         if result["chosen_set"]:
             for key in result["chosen_set"]:
-                errors.append("Got unexpected selection: {} {}".format(
-                    key, result["chosen_set"][key].version
-                ))
+                errors.append(
+                    "Got unexpected selection: {} {}".format(
+                        key, result["chosen_set"][key].version
+                    )
+                )
 
         # TODO: Check the graph of dependencies
 
