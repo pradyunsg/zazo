@@ -3,8 +3,9 @@
 
 from copy import deepcopy
 
-from zazo.api import Candidate, Provider
 from packaging.requirements import Requirement
+
+from zazo.api import Candidate, Provider
 
 
 class YAMLCandidate(Candidate):

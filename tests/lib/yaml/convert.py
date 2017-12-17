@@ -9,9 +9,10 @@ from random import shuffle
 from packaging.requirements import Requirement
 from packaging.version import parse as parse_version
 
+from zazo.api import CannotSatisfy
+
 from .abcs import YAMLCandidate
 from .exceptions import YAMLException
-from zazo.api import CannotSatisfy
 
 
 def _split_and_strip(my_str, splitwith, count=None):

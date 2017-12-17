@@ -5,16 +5,17 @@ from __future__ import absolute_import
 
 import traceback
 
-import yaml
 import pytest
-from packaging.requirements import Requirement, InvalidRequirement
+import yaml
+from packaging.requirements import InvalidRequirement, Requirement
+
+from zazo.api import BackTrackingResolver, CannotSatisfy
 
 from .abcs import YAMLProvider
 from .convert import (
     convert_index_to_candidates, convert_result_and_expected_and_check
 )
 from .exceptions import YAMLException
-from zazo.api import BackTrackingResolver, CannotSatisfy
 
 
 class YamlFixtureItem(pytest.Item):
