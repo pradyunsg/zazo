@@ -2,7 +2,7 @@
   # Explores D 2.0.0 first but then C requires D 1.x.x, causing a change to
   # choosing D 1.0.0 (lower version)
   index:
-    - A 1.0.0; depends B, C
+    - A 1.0.0; depends B & C
     - B 1.0.0; depends D
     - C 1.0.0; depends D ~= 1.0.0
     - C 1.0.1; depends D ~= 1.0.0
@@ -27,7 +27,7 @@
 
 - name: Unresolvable Simple Diamond Conflict
   index:
-    - A 1.0.0; depends B == 1.0.0, C == 1.0.0
+    - A 1.0.0; depends B == 1.0.0 & C == 1.0.0
     - B 1.0.0; depends D == 1.0.0
     - C 1.0.0; depends D == 2.0.0
     - D 1.0.0
@@ -42,7 +42,7 @@
 
 - name: Unresolvable Multiversion Diamond Conflict
   index:
-    - A 1.0.0; depends B, C
+    - A 1.0.0; depends B & C
 
     - B 1.0.0; depends D == 1.0.0
     - B 2.0.0; depends D == 3.0.0

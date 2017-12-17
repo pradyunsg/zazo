@@ -50,7 +50,7 @@
 
 - name: Extra depending on same package's extra
   index:
-    - A 1.0.0; depends B, C[extra1]
+    - A 1.0.0; depends B & C[extra1]
     - B 1.0.0; depends C[extra2]
 
     - name: C
