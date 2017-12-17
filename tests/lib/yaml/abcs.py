@@ -4,6 +4,7 @@
 from copy import deepcopy
 
 from zazo.api import Candidate, Provider
+from packaging.requirements import Requirement
 
 
 class YAMLCandidate(Candidate):
@@ -17,29 +18,45 @@ class YAMLCandidate(Candidate):
         assert None in dependencies.keys(), "improper dependencies"
 
         self._dependencies = dependencies
-        # self._extras_requested = set()
+        self.extras = set()
 
     def __repr__(self):
-        return "YAMLCandidate(name={!r}, version={}, dependecies={})".format(
-            self.name, self.version, self._dependencies
+        return "YAMLCandidate('{} {}', extras={}, depends={})".format(
+            self.name, self.version, self.extras, self._get_dependencies()
         )
 
     def _get_dependencies(self):
-        deps = deepcopy(self._dependencies)
+        num_of_extras = len(self.extras)
 
-        retval = deps[None]
-        # for extra in self.extras:
-        #     if extra in deps:
-        #         for item in deps[extra]:
-        #             item.extras |= self.extras
-        #         retval.extend(deps[extra])
-        return retval
+        if num_of_extras == 0:
+            # There are no extras, return the top-level requirements
+            return deepcopy(self._dependencies[None])
+        elif num_of_extras == 1:
+            extra_name = list(self.extras)[0]  # XXX: Check if this is _slow_?
+            # We are "simple" extra requirement, depend on the matching package
+            # name-version pair and extra dependencies.
+            retval = [
+                Requirement("{} == {}".format(self.name, self.version))
+            ]
+            for extra in self.extras:
+                if extra in self._dependencies:
+                    retval.extend(self._dependencies[extra])
+            return retval
+        else:
+            # Short hands
+            name = self.name
+            version = self.version
+
+            return [
+                Requirement("{}[{}] == {}".format(name, extra_name, version))
+                for extra_name in self.extras
+            ]
 
     def matches(self, requirement):
         return (
             self.name == requirement.name and
-            self.version in requirement.specifier
-            # and all(e in self._extras_requested for e in requirement.extras)
+            self.version in requirement.specifier and
+            requirement.extras == self.extras
         )
 
 
@@ -48,17 +65,22 @@ class YAMLProvider(Provider):
     def __init__(self, data):
         super(YAMLProvider, self).__init__()
         self._candidates_by_name = data
+        self._dependencies_by_candidate = data
 
     def get_candidates(self, requirement):
         try:
-            candidates = self._candidates_by_name[requirement.name]
+            candidates = deepcopy(self._candidates_by_name[requirement.name])
         except KeyError:
             return []
 
-        return sorted(
+        for candidate in candidates:
+            candidate.extras |= requirement.extras
+
+        # TODO: Figure out a better way to do this
+        return reversed(sorted(
             filter(lambda x: x.matches(requirement), candidates),
             key=lambda x: x.version
-        )[::-1]
+        ))
 
     def fetch_dependencies(self, candidate):
         # The reason we've ended up doing this is because of us loading and
