@@ -75,8 +75,8 @@ def convert_index_to_candidates(index):
                     all(isinstance(x, str) for x in item["depends"])
                 ), "index-item depends should be a List[str]"
                 dependencies[None] = [
-                        _make_req(string, item) for string in item["depends"]
-                    ]
+                    _make_req(string, item) for string in item["depends"]
+                ]
 
             # If there are any extras, add information about them to the
             # dependencies dictionary.
@@ -119,8 +119,12 @@ def _convert_error(result):
 
 
 def _convert_resolved_set(result):
+    retval = result.copy()
+    for item in result:
+        if "[" in item:
+            del retval[item]
     # TODO: Make this do some actual restructuring
-    return {"chosen_set": result.copy()}
+    return {"chosen_set": retval}
 
 
 def convert_result_and_expected_and_check(result, expected):
