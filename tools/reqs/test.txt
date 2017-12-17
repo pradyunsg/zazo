@@ -1,6 +1,7 @@
 hypothesis
 mock
-pytest
+pytest; python_version > "3.3"
+pytest < 3.3.0; python_version == "3.3"
 pytest-catchlog
 pytest-timeout
 pytest-xdist

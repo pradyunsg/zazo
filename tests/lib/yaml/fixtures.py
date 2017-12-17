@@ -121,7 +121,8 @@ class YamlFixtureFile(pytest.File):
             yield YamlFixtureItem(name, self, item)
 
     def collect(self):
+        loader = yaml.CLoader if hasattr(yaml, 'CLoader') else yaml.Loader
         with self.fspath.open() as f:
-            data = yaml.load(f.read(), Loader=yaml.CLoader)
+            data = yaml.load(f.read(), Loader=loader)
         for test in self._compose_tests(data):
             yield test
