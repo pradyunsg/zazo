@@ -38,9 +38,8 @@ class YAMLCandidate(Candidate):
             retval = [
                 Requirement("{} == {}".format(self.name, self.version))
             ]
-            for extra in self.extras:
-                if extra in self._dependencies:
-                    retval.extend(self._dependencies[extra])
+            if extra_name in self._dependencies:
+                retval.extend(self._dependencies[extra_name])
             return retval
         else:
             # Short hands
