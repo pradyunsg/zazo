@@ -35,9 +35,7 @@ class YAMLCandidate(Candidate):
             extra_name = list(self.extras)[0]  # XXX: Check if this is _slow_?
             # We are "simple" extra requirement, depend on the matching package
             # name-version pair and extra dependencies.
-            retval = [
-                Requirement("{} == {}".format(self.name, self.version))
-            ]
+            retval = [Requirement("{} == {}".format(self.name, self.version))]
             if extra_name in self._dependencies:
                 retval.extend(self._dependencies[extra_name])
             return retval
@@ -76,10 +74,12 @@ class YAMLProvider(Provider):
             candidate.extras |= requirement.extras
 
         # TODO: Figure out a better way to do this
-        return reversed(sorted(
-            filter(lambda x: x.matches(requirement), candidates),
-            key=lambda x: x.version
-        ))
+        return reversed(
+            sorted(
+                filter(lambda x: x.matches(requirement), candidates),
+                key=lambda x: x.version
+            )
+        )
 
     def fetch_dependencies(self, candidate):
         # The reason we've ended up doing this is because of us loading and
