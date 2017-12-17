@@ -65,19 +65,21 @@ def convert_index_to_candidates(index):
                 "index-item version is not a string"
             version = parse_version(item["version"])
 
+            # This is where we store information about dependencies of a
+            # package.
+            dependencies = {None: []}
+
             if "depends" in item:
                 assert (
                     isinstance(item["depends"], list) and
                     all(isinstance(x, str) for x in item["depends"])
-                ), "index-item depends should be a list of strings"
-                dependencies = {
-                    None: [
+                ), "index-item depends should be a List[str]"
+                dependencies[None] = [
                         _make_req(string, item) for string in item["depends"]
                     ]
-                }
-            else:
-                dependencies = {None: []}
 
+            # If there are any extras, add information about them to the
+            # dependencies dictionary.
             if "extras" in item:
                 assert (
                     isinstance(item["extras"], dict) and all(
@@ -89,10 +91,12 @@ def convert_index_to_candidates(index):
                     )
                 ), "index-item extras is not a Dict[str, List[str]]"
 
-                for k, v in item["extras"].items():
-                    dependencies[k] = [_make_req(string, item) for string in v]
-
+                for key, value in item["extras"].items():
+                    dependencies[key] = [
+                        _make_req(string, item) for string in value
+                    ]
             return YAMLCandidate(name, version, dependencies)
+
         assert False, "should never reach here"
 
     # Create the list of candidates
