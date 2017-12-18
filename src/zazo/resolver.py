@@ -37,7 +37,8 @@ class BackTrackingResolver(object):
         self._initial_recursion_depth = len(inspect.stack())
         graph = {}  # type: Graph
         try:
-            retval = self._resolve(requirements, graph)
+            # The following involves a speedup hack.
+            retval = self._resolve(requirements, graph, _log=logger.debug)
         except CannotSatisfy:
             logger.debug("Unable to satisfy dependencies.")
             raise
@@ -45,60 +46,65 @@ class BackTrackingResolver(object):
             logger.debug("Found satisfying set: %s", retval)
             return retval
 
-    def _resolve(self, requirements, graph):
+    # TODO: Figure out feasibility of blacklisting of known conflicts, like
+    #       Stork.
+    def _resolve(self, requirements, graph, _log):
         # type: (List[Requirement], Graph) -> Graph
         if not requirements:
             return graph
+
+        # Extract the top level requirement
         req = requirements[0]
         req_key = _create_key(req)
         requirements = requirements[1:]
 
+        s = ""  # noqa
+        # The following is some stuff for logging clarity (comment when unused)
         recursion_depth = len(inspect.stack()) - self._initial_recursion_depth
-        s = "  " * (recursion_depth - 1)
+        s += "  " * (recursion_depth - 1)  # noqa
 
-        logger.debug(s + "will attempt to satisfy: %s", req)
+        _log(s + "will attempt to satisfy: %s", req)
         if req_key in graph:
             # We have seen this requirement; check if we satisfy it already
             existing_candidate = graph[req_key]
-            logger.debug(s + "  already selected: %s", existing_candidate)
+            _log(s + "  already selected: %s", existing_candidate)
             if not existing_candidate.matches(req):
-                logger.debug(s + "    does not match requirement")
+                _log(s + "    does not match requirement")
                 raise CannotSatisfy(req, existing_candidate)
-            logger.debug(s + "    does match requirement")
+            _log(s + "    does match requirement")
             # Proceed to the next requirement
             try:
-                retval = self._resolve(requirements, graph)
+                retval = self._resolve(requirements, graph, _log)
             except CannotSatisfy:
                 raise
             else:
-                logger.debug(
+                _log(
                     s + "proceeding with existing selection %s",
-                    existing_candidate
+                    existing_candidate,
                 )
                 return retval
 
-        logger.debug(s + "  not selected yet: %s", req_key)
+        _log(s + "  not selected yet: %s", req_key)
         candidates = self.provider.get_candidates(req)
-        lambda: logger.debug(s + "  candidate count: %d", len(candidates))
         for candidate in candidates:
             assert candidate.matches(req), (
                 "candidate does not match requirement it was guaranteed "
                 "to match"
             )
-            logger.debug(s + "  selecting: %s", candidate)
+            _log(s + "  selecting: %s", candidate)
 
             graph[req_key] = candidate
             dependencies = self.provider.fetch_dependencies(candidate)
             try:
                 retval = self._resolve(
-                    dependencies + requirements, graph.copy()
+                    dependencies + requirements, graph, _log,
                 )
             except CannotSatisfy:
                 assert graph[req_key] == candidate
                 del graph[req_key]
             else:
-                logger.debug(s + "proceeding with selection %s", candidate)
+                _log(s + "proceeding with selection %s", candidate)
                 return retval
 
         # If we are here, we could not satisfy the given requirements
-        raise CannotSatisfy([req] + requirements, graph.copy())
+        raise CannotSatisfy([req] + requirements, graph)
