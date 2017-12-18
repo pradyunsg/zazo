@@ -15,9 +15,10 @@ This project has grown out of a [GSoC Project], which aimed to bring proper depe
 This project uses tox extensively.
 
 - Documentation is built with `tox docs`.
-- Tests are run with `tox py36`.
-- Linting checks are done with `tox lint-py3` and `tox lint-py2`.
 - MyPy checking can be done using `tox mypy`
+- Linting checks are done with `tox lint-py3` and `tox lint-py2`.
+- Tests are run with `tox py36`.
+  - Currently most of the tests are in a YAML format, kept in `tests/yaml` and run using the helpers in `tests/lib/yaml`.
 
 Requirement Files containing dependencies for tests, documentation, linting etc are in `tools/reqs` folder.
 
