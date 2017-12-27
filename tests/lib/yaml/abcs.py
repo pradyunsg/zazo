@@ -31,7 +31,7 @@ class YAMLCandidate(Candidate):
 
         if num_of_extras == 0:
             # There are no extras, return the top-level requirements
-            return deepcopy(self._dependencies[None])
+            return self._dependencies[None]
         elif num_of_extras == 1:
             extra_name = list(self.extras)[0]  # XXX: Check if this is _slow_?
             # We are "simple" extra requirement, depend on the matching package
@@ -83,6 +83,8 @@ class YAMLProvider(Provider):
         )
 
     def fetch_dependencies(self, candidate):
-        # The reason we've ended up doing this is because of us loading and
-        # storing dependency information in a candidate.
+        # The reason I've ended up doing this is because of loading and
+        # storing dependency information in a candidate. This can be how the
+        # consumer's classes behave -- the point is, the algorithm would not
+        # care and still work.
         return candidate._get_dependencies()
