@@ -8,7 +8,8 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 def read(*parts):
     try:
-        return open(os.path.join(here, *parts), 'r').read()
+        with open(os.path.join(here, *parts), 'r') as f:
+            return f.read()
     except IOError:
         return "Could not read."
 
