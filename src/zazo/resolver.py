@@ -66,11 +66,11 @@ class BackTrackingResolver(object):
         _log(s + "will attempt to satisfy: %s", req)
         if req_key in graph:
             # We have seen this requirement; check if we satisfy it already
-            existing_candidate = graph[req_key]
-            _log(s + "  already selected: %s", existing_candidate)
-            if not existing_candidate.matches(req):
+            chosen_before = graph[req_key]
+            _log(s + "  already chosen: %s", chosen_before)
+            if not chosen_before.matches(req):
                 _log(s + "    does not match requirement")
-                raise CannotSatisfy(req, existing_candidate)
+                raise CannotSatisfy(req, chosen_before)
             _log(s + "    does match requirement")
             # Proceed to the next requirement
             try:
@@ -78,20 +78,17 @@ class BackTrackingResolver(object):
             except CannotSatisfy:
                 raise
             else:
-                _log(
-                    s + "proceeding with existing selection %s",
-                    existing_candidate,
-                )
+                _log(s + "proceeding with existing choice: %s", chosen_before)
                 return retval
 
-        _log(s + "  not selected yet: %s", req_key)
+        _log(s + "  not chosen yet: %s", req_key)
         candidates = self.provider.get_candidates(req)
         for candidate in candidates:
             assert candidate.matches(req), (
                 "candidate does not match requirement it was guaranteed "
                 "to match"
             )
-            _log(s + "  selecting: %s", candidate)
+            _log(s + "  choosing: %s", candidate)
 
             graph[req_key] = candidate
             dependencies = self.provider.fetch_dependencies(candidate)
@@ -103,7 +100,7 @@ class BackTrackingResolver(object):
                 assert graph[req_key] == candidate
                 del graph[req_key]
             else:
-                _log(s + "proceeding with selection %s", candidate)
+                _log(s + "proceeding with choice: %s", candidate)
                 return retval
 
         # If we are here, we could not satisfy the given requirements
