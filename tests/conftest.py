@@ -6,7 +6,7 @@ from tests.lib.yaml import YamlFixtureFile
 
 
 def pytest_collect_file(parent, path):
-    if path.ext == ".yaml":
+    if path.ext == ".yaml" and ".ignore" not in str(path):
         return YamlFixtureFile(path, parent)
 
 
