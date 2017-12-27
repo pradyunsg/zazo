@@ -19,3 +19,5 @@ dist/
 
 # Sphinx documentation
 docs/build/
+
+*.ignore
