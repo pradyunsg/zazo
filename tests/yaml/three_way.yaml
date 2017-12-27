@@ -1,7 +1,7 @@
 -
   name: Three way multiversion conflict
+  # Based on https://github.com/CocoaPods/Resolver-Integration-Specs/blob/29028e43/index/three_way_conflict.json
   index:
-    # Based on https://github.com/CocoaPods/Resolver-Integration-Specs/blob/29028e43/index/three_way_conflict.json
     - A 2.0.0; depends D ~= 2.0
     - A 1.0.1; depends D ~= 1.3
     - A 0.3.0; depends D ~= 1.0

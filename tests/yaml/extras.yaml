@@ -1,5 +1,4 @@
--
-  name: Extra Dependencies Explored
+- name: Extra Dependencies Explored
   index:
     - name: A
       version: 1.0.0

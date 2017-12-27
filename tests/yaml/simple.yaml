@@ -1,6 +1,5 @@
 # Sanity Checks
--
-  name: Compatible selected
+- name: Ensure compatible candidate is selected
   index:
     - A 1.0.0
     - A 2.0.0
@@ -13,8 +12,7 @@
       set:
       # we want it installing the latest version
       - A 2.0.0
--
-  name: Dependencies explored
+- name: Ensure candidate's unconditional dependencies are selected
   index:
     - A 1.0.0; depends B
     - B 1.0.0
