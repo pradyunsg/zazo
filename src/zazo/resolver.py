@@ -49,7 +49,7 @@ class BackTrackingResolver(object):
     # TODO: Figure out feasibility of blacklisting of known conflicts, like
     #       Stork.
     def _resolve(self, requirements, graph, _log):
-        # type: (List[Requirement], Graph) -> Graph
+        # type: (List[Requirement], Graph, Any) -> Graph
         if not requirements:
             return graph
 
@@ -91,11 +91,9 @@ class BackTrackingResolver(object):
             _log(s + "  choosing: %s", candidate)
 
             graph[req_key] = candidate
-            dependencies = self.provider.fetch_dependencies(candidate)
+            deps = self.provider.fetch_dependencies(candidate)
             try:
-                retval = self._resolve(
-                    dependencies + requirements, graph, _log,
-                )
+                retval = self._resolve(deps + requirements, graph, _log)
             except CannotSatisfy:
                 assert graph[req_key] == candidate
                 del graph[req_key]
