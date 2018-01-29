@@ -7,9 +7,9 @@ import logging
 from .exceptions import CannotSatisfy
 
 if False:
-    from typing import List, Dict  # NOQA
-    from packaging.requirements import Requirement  # NOQA
-    from .abc import Provider, Candidate  # NOQA
+    from typing import Any, List, Dict  # noqa
+    from packaging.requirements import Requirement  # noqa
+    from zazo.abc import Provider, Candidate  # noqa
 
     Graph = Dict[str, Candidate]
 
