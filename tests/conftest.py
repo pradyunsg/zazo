@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from tests.lib.yaml import YamlFixtureFile
+from tests.lib.yaml.fixtures import YamlFixtureFile
 
 
 def pytest_collect_file(parent, path):
