@@ -2,7 +2,6 @@ hypothesis
 mock
 pytest
 pytest-benchmark
-pytest-catchlog
 pytest-timeout
 pytest-xdist
 pyyaml
