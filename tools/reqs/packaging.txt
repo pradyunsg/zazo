@@ -1,2 +1,1 @@
-check-manifest
-readme_renderer
+flit
