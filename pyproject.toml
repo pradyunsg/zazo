@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools", "wheel", "flit"]
+build-backend = "flit.buildapi"
+
+[tool.flit.metadata]
+module = "zazo"
+requires = ["packaging", "six"]
+
+author = "Pradyun Gedam"
+author-email = "pradyunsg@gmail.com"
+description-file = "README.md"
+home-page = "https://github.com/pradyunsg/zazo"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 2",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.4",
+    "Programming Language :: Python :: 3.5",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: Implementation :: PyPy"
+]
+
+    [tool.flit.metadata.urls]
+    "Documentation" = "https://zazo.readthedocs.io/en/latest/"
