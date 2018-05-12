@@ -1,0 +1,24 @@
+- name: resolves a simple conflict index
+  index:
+    - activemodel 3.2.10; depends builder ~= 3.0.0
+    - activemodel 3.2.11; depends builder ~= 3.0.0
+    - activemodel 3.2.8; depends builder ~= 3.0.0
+    - activemodel 3.2.9; depends builder ~= 3.0.0
+    - builder 3.0.4
+    - builder 3.1.4
+    - grape 0.2.6; depends builder >= 0
+    - my_app 1.0.0; depends activemodel >= 0 & grape >= 0
+  actions:
+    - install:
+      - my_app
+  results:
+  - set:
+      - activemodel 3.2.11
+      - builder 3.0.4
+      - grape 0.2.6
+      - my_app 1.0.0
+    graph:
+      - activemodel 3.2.11 -> builder 3.0.4
+      - grape 0.2.6 -> builder 3.0.4
+      - my_app 1.0.0 -> activemodel 3.2.11
+      - my_app 1.0.0 -> grape 0.2.6
