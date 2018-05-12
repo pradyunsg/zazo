@@ -13,11 +13,11 @@ dist/
 
 # Unit test / coverage reports
 .nox/
-.cache/
-.mypy_cache/
+.*cache/
 .hypothesis/
 
 # Sphinx documentation
 docs/build/
 
 *.ignore
+*.ignore.*
