@@ -41,9 +41,9 @@ def lint_session(func):
 def lint(session, files):
     session.run("black", "--check", *files)
     session.run("isort", "--check-only", "--diff", "--recursive", *files)
-    session.run("mypy", "--ignore-missing-imports", "--check-untyped-defs", *files)
+    session.run("mypy", "--ignore-missing-imports", "--check-untyped-defs", "zazo")
     session.run(
-        "mypy", "-2", "--ignore-missing-imports", "--check-untyped-defs", *files
+        "mypy", "-2", "--ignore-missing-imports", "--check-untyped-defs", "zazo"
     )
 
 
