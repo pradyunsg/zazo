@@ -12,12 +12,12 @@ dist/
 *.egg-info/
 
 # Unit test / coverage reports
-.tox/
-.cache/
-.mypy_cache/
+.nox/
+.*cache/
 .hypothesis/
 
 # Sphinx documentation
 docs/build/
 
 *.ignore
+*.ignore.*

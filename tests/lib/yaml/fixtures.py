@@ -12,9 +12,7 @@ from packaging.requirements import InvalidRequirement, Requirement
 from zazo.api import BackTrackingResolver, CannotSatisfy
 
 from .abcs import YAMLProvider
-from .convert import (
-    convert_index_to_candidates, convert_result_and_expected_and_check
-)
+from .convert import convert_index_to_candidates, convert_result_and_expected_and_check
 from .exceptions import YAMLException
 
 
@@ -26,10 +24,8 @@ class YamlFixtureItem(pytest.Item):
         self.spec = spec
 
     def _compose_requirements(self):
-        assert isinstance(self.spec["actions"], list), \
-            "actions should be a list"
-        assert isinstance(self.spec["results"], list), \
-            "results should be a list"
+        assert isinstance(self.spec["actions"], list), "actions should be a list"
+        assert isinstance(self.spec["results"], list), "results should be a list"
 
         for action, result in zip(self.spec["actions"], self.spec["results"]):
             assert isinstance(action, dict), "an action should be a dict"
@@ -43,16 +39,14 @@ class YamlFixtureItem(pytest.Item):
             if isinstance(req_str_list, str):
                 req_str_list = [req_str_list]
             assert (
-                isinstance(req_str_list, list) and
-                all(isinstance(x, str) for x in req_str_list)
+                isinstance(req_str_list, list)
+                and all(isinstance(x, str) for x in req_str_list)
             ), "requirements should be a string or list of strings"
 
             try:
                 requirements = [Requirement(r) for r in req_str_list]
             except InvalidRequirement:
-                raise YAMLException(
-                    "Got invalid requirement in {}", req_str_list
-                )
+                raise YAMLException("Got invalid requirement in {}", req_str_list)
             yield requirements, result
 
     def runtest(self):
@@ -62,9 +56,7 @@ class YamlFixtureItem(pytest.Item):
         assert "results" in self.spec, "there should be results in a test"
 
         # Create a Provider, using index
-        provider = YAMLProvider(
-            convert_index_to_candidates(self.spec["index"])
-        )
+        provider = YAMLProvider(convert_index_to_candidates(self.spec["index"]))
 
         for requirements, expected in self._compose_requirements():
             # Actual Testing Code
@@ -87,13 +79,10 @@ class YamlFixtureItem(pytest.Item):
                 message = excinfo.value.args[0]
             else:
                 try:
-                    message = excinfo.value.args[0].format(
-                        *excinfo.value.args[1:]
-                    )
+                    message = excinfo.value.args[0].format(*excinfo.value.args[1:])
                 except Exception as error:
                     message = "Unable to format message: {}\n{}".format(
-                        excinfo.value.args,
-                        error,
+                        excinfo.value.args, error
                     )
             # Print the reason
             return "YAML is malformed -- reason: {}".format(message)
@@ -104,9 +93,7 @@ class YamlFixtureItem(pytest.Item):
                 msg = ""
             return "assertion failed" + msg
         else:
-            trace = traceback.format_exception(
-                excinfo.type, excinfo.value, excinfo.tb
-            )
+            trace = traceback.format_exception(excinfo.type, excinfo.value, excinfo.tb)
             return "".join(trace) + "\nError occurred."
 
     def reportinfo(self):
@@ -122,7 +109,7 @@ class YamlFixtureFile(pytest.File):
             yield YamlFixtureItem(name, self, item)
 
     def collect(self):
-        loader = yaml.CLoader if hasattr(yaml, 'CLoader') else yaml.Loader
+        loader = yaml.CLoader if hasattr(yaml, "CLoader") else yaml.Loader
         with self.fspath.open() as f:
             data = yaml.load(f.read(), Loader=loader)
         for test in self._compose_tests(data):

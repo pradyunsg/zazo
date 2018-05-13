@@ -17,13 +17,12 @@ def pytest_collection_modifyitems(session, config, items):
             item.add_marker(pytest.mark.yaml)
             item.add_marker(pytest.mark.integration)
 
-        if not hasattr(item, 'module'):
+        if not hasattr(item, "module"):
             continue
 
         # Get path of the file
         module_path = os.path.relpath(
-            item.module.__file__,
-            os.path.commonprefix([__file__, item.module.__file__]),
+            item.module.__file__, os.path.commonprefix([__file__, item.module.__file__])
         )
         # Mark the type of test
         module_root_dir = module_path.split(os.pathsep)[0]

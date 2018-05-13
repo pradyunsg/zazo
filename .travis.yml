@@ -2,34 +2,31 @@ language: python
 
 matrix:
   include:
-    - env: TOXENV=docs
-    - env: TOXENV=packaging
-    - env: TOXENV=mypy
-    - env: TOXENV=lint-py3
-    - env: TOXENV=lint-py2
-
-    - env: TOXENV=pypy
-      python: pypy3
-    - env: TOXENV=pypy
-      python: pypy
-
-    - env: TOXENV=py27
-      python: 2.7
-    - env: TOXENV=py37
-      python: nightly
-    - env: TOXENV=py36
+    # Code Quality Checks
+    - env: KIND=lint
       python: 3.6
-    - env: TOXENV=py35
-      python: 3.5
-    - env: TOXENV=py34
-      python: 3.4
-    - env: TOXENV=py33
-      python: 3.3
+    - env: KIND=docs
+      python: 3.6
+    - env: KIND=packaging
+      python: 3.6
+
+    # Test Suite
+    - python: pypy3
+    - python: pypy
+    - python: 2.7
+    - python: 3.6
+    - python: 3.5
+    - python: 3.4
+    - python: nightly
+      env: KIND="test(python_version='3.7')"
 
   allow_failures:
     - python: nightly
 
 install:
-  - travis_retry tools/travis/install.sh
+  - pip install --upgrade nox-automation
+  - ./tools/travis/install.sh
+before_script:
+  - export SESSION="${KIND:-test(python_version="'"${TRAVIS_PYTHON_VERSION}"'")}"
 script:
-  - tox
+  - nox -s $SESSION

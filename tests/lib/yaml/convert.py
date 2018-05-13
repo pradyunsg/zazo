@@ -28,9 +28,7 @@ def _make_req(string, item):
     try:
         return Requirement(string)
     except Exception:
-        raise YAMLException(
-            "Could not parse requirement {!r} from {!r}", string, item
-        )
+        raise YAMLException("Could not parse requirement {!r} from {!r}", string, item)
 
 
 def convert_index_to_candidates(index):
@@ -43,27 +41,26 @@ def convert_index_to_candidates(index):
                 depends = []
             else:
                 name_version, depends_str = _split_and_strip(item, ";", 1)
-                assert depends_str.startswith("depends "), \
-                    "dependencies string must be specified with 'depends '"
+                assert depends_str.startswith(
+                    "depends "
+                ), "dependencies string must be specified with 'depends '"
                 depends = _split_and_strip(depends_str[len("depends "):], "&")
 
             name, version = _split_and_strip(name_version, " ", 1)
             version = parse_version(version)
-            dependencies = {
-                None: [_make_req(string, item) for string in depends]
-            }
+            dependencies = {None: [_make_req(string, item) for string in depends]}
 
             return YAMLCandidate(name, version, dependencies)
 
         if isinstance(item, dict):
             assert "name" in item, "index-item is not named"
-            assert isinstance(item["name"], str), \
-                "index-item name is not a string"
+            assert isinstance(item["name"], str), "index-item name is not a string"
             name = item["name"]
 
             assert "version" in item, "index-item is not versioned"
-            assert isinstance(item["version"], str), \
-                "index-item version is not a string"
+            assert isinstance(
+                item["version"], str
+            ), "index-item version is not a string"
             version = parse_version(item["version"])
 
             # This is where we store information about dependencies of a
@@ -72,8 +69,8 @@ def convert_index_to_candidates(index):
 
             if "depends" in item:
                 assert (
-                    isinstance(item["depends"], list) and
-                    all(isinstance(x, str) for x in item["depends"])
+                    isinstance(item["depends"], list)
+                    and all(isinstance(x, str) for x in item["depends"])
                 ), "index-item depends should be a List[str]"
                 dependencies[None] = [
                     _make_req(string, item) for string in item["depends"]
@@ -83,19 +80,19 @@ def convert_index_to_candidates(index):
             # dependencies dictionary.
             if "extras" in item:
                 assert (
-                    isinstance(item["extras"], dict) and all(
+                    isinstance(item["extras"], dict)
+                    and all(
                         isinstance(x[0], str) and isinstance(x[1], list)
                         for x in item["extras"].items()
-                    ) and all(
+                    )
+                    and all(
                         all(isinstance(y, str) for y in x)
                         for x in item["extras"].values()
                     )
                 ), "index-item extras is not a Dict[str, List[str]]"
 
                 for key, value in item["extras"].items():
-                    dependencies[key] = [
-                        _make_req(string, item) for string in value
-                    ]
+                    dependencies[key] = [_make_req(string, item) for string in value]
             return YAMLCandidate(name, version, dependencies)
 
         assert False, "should never reach here"
@@ -132,9 +129,7 @@ def convert_result_and_expected_and_check(result, expected):
     """Convert a single resolver-run result to match what was expected
     """
     if not isinstance(expected, dict):
-        raise YAMLException(
-            "The expected result of this test is not a dictionary."
-        )
+        raise YAMLException("The expected result of this test is not a dictionary.")
 
     if isinstance(result, CannotSatisfy):
         result = _convert_error(result)

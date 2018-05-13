@@ -1,9 +1,14 @@
 #!/bin/bash
-set -e
 set -x
+set -e
 
-git config --global user.name "Travis CI"
-git config --global user.email "travis@travis-ci.org"
+# Install pip on Python 3 if we're on Python 2 / PyPy
+if [ "$TRAVIS_PYTHON_VERSION" == "2.7" ] || [ "$TRAVIS_PYTHON_VERSION" == "pypy" ]; then
+  wget https://bootstrap.pypa.io/get-pip.py
+  python3 get-pip.py --user
+  rm get-pip.py
+  EXTRA_ARGS=--user
+fi
 
-pip install --upgrade setuptools
-pip install --upgrade tox
+# Install flit
+python3 -m pip install $EXTRA_ARGS flit
