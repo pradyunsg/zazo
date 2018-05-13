@@ -85,8 +85,7 @@ class BackTrackingResolver(object):
         candidates = self.provider.get_candidates(req)
         for candidate in candidates:
             assert candidate.matches(req), (
-                "candidate does not match requirement it was guaranteed "
-                "to match"
+                "candidate does not match requirement it was guaranteed " "to match"
             )
             _log(s + "  choosing: %s", candidate)
 

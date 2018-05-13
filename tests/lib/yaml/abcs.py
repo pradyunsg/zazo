@@ -14,8 +14,7 @@ class YAMLCandidate(Candidate):
         super(YAMLCandidate, self).__init__()
         self.name = name
         self.version = version
-        assert isinstance(dependencies, dict), \
-            "Mapping of extras to requirements"
+        assert isinstance(dependencies, dict), "Mapping of extras to requirements"
         assert None in dependencies.keys(), "improper dependencies"
 
         self._dependencies = dependencies
@@ -52,9 +51,9 @@ class YAMLCandidate(Candidate):
 
     def matches(self, requirement):
         return (
-            self.name == requirement.name and
-            self.version in requirement.specifier and
-            requirement.extras == self.extras
+            self.name == requirement.name
+            and self.version in requirement.specifier
+            and requirement.extras == self.extras
         )
 
 
@@ -78,7 +77,7 @@ class YAMLProvider(Provider):
         return reversed(
             sorted(
                 filter(lambda x: x.matches(requirement), candidates),
-                key=lambda x: x.version
+                key=lambda x: x.version,
             )
         )
 
