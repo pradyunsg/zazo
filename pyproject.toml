@@ -4,11 +4,8 @@ build-backend = "flit.buildapi"
 
 [tool.flit.metadata]
 module = "zazo"
-requires = ["packaging", "six"]
-
 author = "Pradyun Gedam"
 author-email = "pradyunsg@gmail.com"
-description-file = "README.md"
 home-page = "https://github.com/pradyunsg/zazo"
 classifiers = [
     "License :: OSI Approved :: MIT License",
@@ -21,6 +18,8 @@ classifiers = [
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: Implementation :: PyPy"
 ]
+description-file = "README.md"
+requires = ["packaging", "six"]
 
     [tool.flit.metadata.urls]
     "Documentation" = "https://zazo.readthedocs.io/en/latest/"
