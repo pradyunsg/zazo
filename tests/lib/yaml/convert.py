@@ -44,7 +44,7 @@ def convert_index_to_candidates(index):
                 assert depends_str.startswith(
                     "depends "
                 ), "dependencies string must be specified with 'depends '"
-                depends = _split_and_strip(depends_str[len("depends "):], "&")
+                depends = _split_and_strip(depends_str[len("depends ") :], "&")
 
             name, version = _split_and_strip(name_version, " ", 1)
             version = parse_version(version)
@@ -68,9 +68,8 @@ def convert_index_to_candidates(index):
             dependencies = {None: []}
 
             if "depends" in item:
-                assert (
-                    isinstance(item["depends"], list)
-                    and all(isinstance(x, str) for x in item["depends"])
+                assert isinstance(item["depends"], list) and all(
+                    isinstance(x, str) for x in item["depends"]
                 ), "index-item depends should be a List[str]"
                 dependencies[None] = [
                     _make_req(string, item) for string in item["depends"]

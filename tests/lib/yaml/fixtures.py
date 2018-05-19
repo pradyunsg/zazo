@@ -38,9 +38,8 @@ class YamlFixtureItem(pytest.Item):
             req_str_list = action[verb]
             if isinstance(req_str_list, str):
                 req_str_list = [req_str_list]
-            assert (
-                isinstance(req_str_list, list)
-                and all(isinstance(x, str) for x in req_str_list)
+            assert isinstance(req_str_list, list) and all(
+                isinstance(x, str) for x in req_str_list
             ), "requirements should be a string or list of strings"
 
             try:
