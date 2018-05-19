@@ -31,6 +31,10 @@ def lint_session(func):
             files = LINT_ITEMS
         session.install("--pre", "-r", "tools/reqs/lint.txt")
 
+        session.run("black", "--version")
+        session.run("isort", "--version")
+        session.run("mypy", "--version")
+
         return func(session, files)
 
     return wrapped
