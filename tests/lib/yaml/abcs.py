@@ -10,44 +10,18 @@ from zazo.api import Candidate, Provider
 
 class YAMLCandidate(Candidate):
 
-    def __init__(self, name, version, dependencies):
+    def __init__(self, name, version):
         super(YAMLCandidate, self).__init__()
         self.name = name
         self.version = version
-        assert isinstance(dependencies, dict), "Mapping of extras to requirements"
-        assert None in dependencies.keys(), "improper dependencies"
-
-        self._dependencies = dependencies
         self.extras = set()
 
     def __repr__(self):
-        return "YAMLCandidate('{} {}', extras={}, depends={})".format(
-            self.name, self.version, self.extras, self._get_dependencies()
+        return "<YAMLCandidate({!r}{}, {})>".format(
+            self.name,
+            ("[" + ",".join(self.extras) + "]" if self.extras else ""),
+            self.version,
         )
-
-    def _get_dependencies(self):
-        num_of_extras = len(self.extras)
-
-        if num_of_extras == 0:
-            # There are no extras, return the top-level requirements
-            return self._dependencies[None]
-        elif num_of_extras == 1:
-            extra_name = list(self.extras)[0]  # XXX: Check if this is _slow_?
-            # We are "simple" extra requirement, depend on the matching package
-            # name-version pair and extra dependencies.
-            retval = [Requirement("{} == {}".format(self.name, self.version))]
-            if extra_name in self._dependencies:
-                retval.extend(self._dependencies[extra_name])
-            return retval
-        else:
-            # Short hands
-            name = self.name
-            version = self.version
-
-            return [
-                Requirement("{}[{}] == {}".format(name, extra_name, version))
-                for extra_name in self.extras
-            ]
 
     def matches(self, requirement):
         return (
@@ -59,12 +33,14 @@ class YAMLCandidate(Candidate):
 
 class YAMLProvider(Provider):
 
-    def __init__(self, data):
+    def __init__(self, candidates, dependencies):
         super(YAMLProvider, self).__init__()
-        self._candidates_by_name = data
-        self._dependencies_by_candidate = data
+        self._candidates_by_name = candidates
+        self._dependencies_by_candidate = dependencies
 
     def get_candidates(self, requirement):
+        # Do a copy of the candidates, since we modify the candidates before
+        # returning them.
         try:
             candidates = deepcopy(self._candidates_by_name[requirement.name])
         except KeyError:
@@ -73,7 +49,9 @@ class YAMLProvider(Provider):
         for candidate in candidates:
             candidate.extras |= requirement.extras
 
-        # TODO: Figure out a better way to do this
+        # NOTE: This is simply ordering the matching candidates in decreasing
+        #       order of version. It only works in a case of installing in an
+        #       empty (or equivalent) environment.
         return reversed(
             sorted(
                 filter(lambda x: x.matches(requirement), candidates),
@@ -82,8 +60,28 @@ class YAMLProvider(Provider):
         )
 
     def get_dependencies(self, candidate):
-        # The reason I've ended up doing this is because of loading and
-        # storing dependency information in a candidate. This can be how the
-        # consumer's classes behave -- the point is, the algorithm would not
-        # care and still work.
-        return candidate._get_dependencies()
+        # Short hands
+        name = candidate.name
+        version = candidate.version
+
+        # Simple Requirement
+        if not candidate.extras:
+            return self._dependencies_by_candidate["{} {}".format(name, version)]
+        # Single Extra (depends on parent + extra)
+        elif len(candidate.extras) == 1:
+            extra = next(iter(candidate.extras))
+
+            # Add the parent package as the first requirement
+            retval = [Requirement("{} == {}".format(name, version))]
+
+            # Add the extra dependencies
+            key = "{}[{}] {}".format(name, extra, version)
+            retval.extend(self._dependencies_by_candidate.get(key, []))
+
+            return retval
+        # Multiple Extras (depends on all single extra variants)
+        else:
+            return [
+                Requirement("{}[{}] == {}".format(name, extra_name, version))
+                for extra_name in candidate.extras
+            ]

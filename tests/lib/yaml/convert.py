@@ -23,6 +23,18 @@ def _check_list(obj, name, content_type=None):
         )
 
 
+def _check_str(obj, name):
+    assert isinstance(obj, str), name + "should be a string"
+
+
+def _check_dict(obj, name, key_check=None, value_check=None):
+    assert isinstance(obj, dict), name + "should be a dictionary"
+    if key_check is not None:
+        all(key_check(key, name + " key") for key in obj.keys())
+    if value_check is not None:
+        all(value_check(value, name + " key") for value in obj.values())
+
+
 def _split_and_strip(my_str, splitwith, count=None):
     """Split a string and strip each component
     """
@@ -52,75 +64,77 @@ def convert_index_string(item):
 
     name, version = _split_and_strip(name_version, " ", 1)
     version = parse_version(version)
-    dependencies = {None: [_make_req(string, item) for string in depends]}
+    dependencies = [_make_req(string, item) for string in depends]
 
-    return YAMLCandidate(name, version, dependencies)
+    return YAMLCandidate(name, version), {name + " " + str(version): dependencies}
 
 
 def convert_index_dict(item):
     assert "name" in item, "index-item is not named"
-    assert isinstance(item["name"], str), "index-item name is not a string"
-    name = item["name"]
-
     assert "version" in item, "index-item is not versioned"
-    assert isinstance(
-        item["version"], str
-    ), "index-item version is not a string"
+
+    _check_str(item["name"], "index-item name")
+    _check_str(item["version"], "index-item version")
+
+    name = item["name"]
     version = parse_version(item["version"])
 
     # This is where we store information about dependencies of a
     # package.
-    dependencies = {None: []}
+    dependencies = {name + " " + str(version): []}
 
     if "depends" in item:
-        assert isinstance(item["depends"], list) and all(
-            isinstance(x, str) for x in item["depends"]
-        ), "index-item depends should be a List[str]"
-        dependencies[None] = [
+        _check_list(item["depends"], "index-item depends", str)
+
+        dependencies[name + " " + str(version)] = [
             _make_req(string, item) for string in item["depends"]
         ]
 
     # If there are any extras, add information about them to the
     # dependencies dictionary.
     if "extras" in item:
-        assert (
-            isinstance(item["extras"], dict)
-            and all(
-                isinstance(x[0], str) and isinstance(x[1], list)
-                for x in item["extras"].items()
-            )
-            and all(
-                all(isinstance(y, str) for y in x)
-                for x in item["extras"].values()
-            )
-        ), "index-item extras is not a Dict[str, List[str]]"
+        _check_dict(
+            item["extras"],
+            "index-item extras",
+            key_check=_check_str,
+            value_check=lambda obj, name: _check_list(obj, name, str),
+        )
 
-        for key, value in item["extras"].items():
-            dependencies[key] = [_make_req(string, item) for string in value]
+        for extra_name, extra_deps in item["extras"].items():
+            key = "{}[{}] {}".format(name, extra_name, version)
+            value = [_make_req(string, item) for string in extra_deps]
+            dependencies[key] = value
 
-    return YAMLCandidate(name, version, dependencies)
+    return YAMLCandidate(name, version), dependencies
 
 
 def convert_index_to_candidates(index):
-    assert isinstance(index, list), "index must be a list"
+    _check_list(index, "index")
 
-    # We will try to parse each item and update the corresponding entries in the
-    # candidate and dependency mappings.
-    candidates = {}
+    # Create a mapping of candidate data
+    candidates = defaultdict(list)
     dependencies = {}
 
-    # Create the list of candidates
-    retval = defaultdict(list)
     for item in index:
         if isinstance(item, str):
-            candidate = convert_index_string(item)
+            candidate, new_deps = convert_index_string(item)
         elif isinstance(item, dict):
-            candidate = convert_index_dict(item)
+            candidate, new_deps = convert_index_dict(item)
         else:
             raise TypeError("Expected a string or dict.")
-        retval[candidate.name].append(candidate)
 
-    return retval
+        # Error Checking
+        already_specified = set(dependencies) & set(new_deps)
+        if already_specified:
+            raise YAMLException(
+                "Got double specification for same candidate.\n{}", already_specified
+            )
+
+        # Add the candidate and dependency information
+        candidates[candidate.name].append(candidate)
+        dependencies.update(new_deps)
+
+    return dict(candidates), dependencies
 
 
 def _convert_error(result):

@@ -13,8 +13,9 @@ from zazo.api import BackTrackingResolver, CannotSatisfy
 
 from .abcs import YAMLProvider
 from .convert import (
-    convert_index_to_candidates, convert_result_and_expected_and_check,
-    _check_list
+    _check_list,
+    convert_index_to_candidates,
+    convert_result_and_expected_and_check,
 )
 from .exceptions import YAMLException
 
@@ -49,10 +50,7 @@ class YamlFixtureItem(pytest.Item):
 
             verb = list(action.keys())[0]
             if verb == "install":
-                yield (
-                    self._compose_install_requirements(action[verb]),
-                    result
-                )
+                yield (self._compose_install_requirements(action[verb]), result)
             else:
                 raise Exception("Unknown verb.")
 
@@ -63,7 +61,10 @@ class YamlFixtureItem(pytest.Item):
         assert "results" in self.spec, "there should be results in a test"
 
         # Create a Provider, using index
-        provider = YAMLProvider(convert_index_to_candidates(self.spec["index"]))
+        candidates, dependencies = convert_index_to_candidates(self.spec["index"])
+        provider = YAMLProvider(candidates, dependencies)
+
+        # Look for all the checks.
         for requirements, expected in self._compose_requirements():
             result = self._run(requirements, provider)
             convert_result_and_expected_and_check(result, expected)
