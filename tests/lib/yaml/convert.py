@@ -15,6 +15,14 @@ from .abcs import YAMLCandidate
 from .exceptions import YAMLException
 
 
+def _check_list(obj, name, content_type=None):
+    assert isinstance(obj, list), name + "should be a list"
+    if content_type is not None:
+        assert all(isinstance(x, content_type) for x in obj), (
+            "all items in " + name + " should be a " + content_type.__name__
+        )
+
+
 def _split_and_strip(my_str, splitwith, count=None):
     """Split a string and strip each component
     """

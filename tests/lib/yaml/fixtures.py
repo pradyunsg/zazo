@@ -12,15 +12,12 @@ from packaging.requirements import InvalidRequirement, Requirement
 from zazo.api import BackTrackingResolver, CannotSatisfy
 
 from .abcs import YAMLProvider
-from .convert import convert_index_to_candidates, convert_result_and_expected_and_check
+from .convert import (
+    convert_index_to_candidates, convert_result_and_expected_and_check,
+    _check_list
+)
 from .exceptions import YAMLException
 
-
-def _check_list(obj, name, content_type=None):
-    assert isinstance(obj, list), name + "should be a list"
-    if content_type is not None:
-        assert all(isinstance(x, content_type) for x in obj), \
-            "all items in " + name + " should be a " + content_type.__name__
 
 class YamlFixtureItem(pytest.Item):
 
