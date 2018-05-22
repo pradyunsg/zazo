@@ -30,6 +30,8 @@ def pytest_collection_modifyitems(session, config, items):
             item.add_marker(pytest.mark.integration)
         elif module_root_dir.startswith("unit"):
             item.add_marker(pytest.mark.unit)
+        elif module_root_dir.startswith("lib"):
+            item.add_marker(pytest.mark.integration)
         else:
             msg = "Unknown test type (filename = {0}, root_dir = {1})".format(
                 module_path, module_root_dir

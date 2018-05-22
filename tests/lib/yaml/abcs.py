@@ -23,11 +23,18 @@ class YAMLCandidate(Candidate):
             self.version,
         )
 
+    def __eq__(self, other):
+        return (
+            self.name == other.name
+            and self.version == other.version
+            and self.extras == other.extras
+        )
+
     def matches(self, requirement):
         return (
             self.name == requirement.name
+            and self.extras == requirement.extras
             and self.version in requirement.specifier
-            and requirement.extras == self.extras
         )
 
 
@@ -52,10 +59,12 @@ class YAMLProvider(Provider):
         # NOTE: This is simply ordering the matching candidates in decreasing
         #       order of version. It only works in a case of installing in an
         #       empty (or equivalent) environment.
-        return reversed(
-            sorted(
-                filter(lambda x: x.matches(requirement), candidates),
-                key=lambda x: x.version,
+        return list(
+            reversed(
+                sorted(
+                    filter(lambda x: x.matches(requirement), candidates),
+                    key=lambda x: x.version,
+                )
             )
         )
 
