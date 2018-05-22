@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/pradyunsg/zazo.svg?branch=master)](https://travis-ci.org/pradyunsg/zazo)
 
-A Pluggable Dependency Resolver written in Python.
+A Pluggable Dependency Resolver written in Python. Intended for bringing dependency resolution to pip.
 
 ## Motivation
 
@@ -12,16 +12,12 @@ This project has grown out of a [GSoC Project], which aimed to bring proper depe
 
 ## Development
 
-This project uses tox extensively.
+This project uses nox extensively.
 
-- Documentation is built with `tox docs`.
-- MyPy checking can be done using `tox mypy`
-- Linting checks are done with `tox lint-py3` and `tox lint-py2`.
-- Tests are run with `tox py36`.
-  - Currently most of the tests are in a YAML format, kept in `tests/yaml` and run using the helpers in `tests/lib/yaml`.
+- Documentation is built with `nox -s docs`.
+- Linting and MyPy checking can be done using `nox -s lint`
+- Tests are run with `nox -s test`.
 
-Requirement Files containing dependencies for tests, documentation, linting etc are in `tools/reqs` folder.
-
-Currently, the documentation of this project is lacking but this shall be rectified once the actual internal details of the package stabilize.
+Currently, the documentation of this project is non-existent but this shall be rectified once the actual internal details of the package stabilize.
 
 [GSoC Project]: https://summerofcode.withgoogle.com/archive/2017/projects/5797394100781056/
