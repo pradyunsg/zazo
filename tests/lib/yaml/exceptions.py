@@ -12,8 +12,6 @@ class YAMLException(Exception):
             try:
                 message = self.args[0].format(*self.args[1:])
             except Exception as error:
-                message = "Unable to format message: {}\n{}".format(
-                    self.args, error
-                )
+                message = "Unable to format message: {}\n{}".format(self.args, error)
         # Print the reason
         return "YAML is malformed -- reason: {}".format(message)
