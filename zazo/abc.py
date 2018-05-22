@@ -36,7 +36,7 @@ class Provider(object):
         raise NotImplementedError("Method to be overridden in a subclass.")
 
     @abc.abstractmethod
-    def fetch_dependencies(self, candidate):
+    def get_dependencies(self, candidate):
         # type: (Candidate) -> List[Requirement]
         """Fetch dependencies of the given candidate
         """

@@ -90,7 +90,7 @@ class BackTrackingResolver(object):
             _log(s + "  choosing: %s", candidate)
 
             graph[req_key] = candidate
-            deps = self.provider.fetch_dependencies(candidate)
+            deps = self.provider.get_dependencies(candidate)
             try:
                 # XXX: This causes a peak in memory usage.
                 retval = self._resolve(deps + requirements, graph, _log)

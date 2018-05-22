@@ -81,7 +81,7 @@ class YAMLProvider(Provider):
             )
         )
 
-    def fetch_dependencies(self, candidate):
+    def get_dependencies(self, candidate):
         # The reason I've ended up doing this is because of loading and
         # storing dependency information in a candidate. This can be how the
         # consumer's classes behave -- the point is, the algorithm would not
