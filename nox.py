@@ -53,7 +53,7 @@ def lint(session, files):
 
 @nox.session
 @lint_session
-def lint_format(session, files):
+def format(session, files):
     session.run("black", *files)
     session.run("isort", "--recursive", *files)
 
