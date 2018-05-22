@@ -16,6 +16,12 @@ from .convert import convert_index_to_candidates, convert_result_and_expected_an
 from .exceptions import YAMLException
 
 
+def _check_list(obj, name, content_type=None):
+    assert isinstance(obj, list), name + "should be a list"
+    if content_type is not None:
+        assert all(isinstance(x, content_type) for x in obj), \
+            "all items in " + name + " should be a " + content_type.__name__
+
 class YamlFixtureItem(pytest.Item):
 
     def __init__(self, name, parent, spec):
@@ -23,30 +29,35 @@ class YamlFixtureItem(pytest.Item):
         super(YamlFixtureItem, self).__init__(name, parent)
         self.spec = spec
 
+    def _compose_install_requirements(self, req_str_list):
+        if isinstance(req_str_list, str):
+            req_str_list = [req_str_list]
+
+        _check_list(req_str_list, "install:", str)
+
+        try:
+            requirements = [Requirement(r) for r in req_str_list]
+        except InvalidRequirement:
+            raise YAMLException("Got invalid requirement in {}", req_str_list)
+
+        return requirements
+
     def _compose_requirements(self):
-        assert isinstance(self.spec["actions"], list), "actions should be a list"
-        assert isinstance(self.spec["results"], list), "results should be a list"
+        _check_list(self.spec["actions"], "actions")
+        _check_list(self.spec["results"], "results")
 
         for action, result in zip(self.spec["actions"], self.spec["results"]):
             assert isinstance(action, dict), "an action should be a dict"
             assert len(action) == 1, "an action should have a single item"
 
             verb = list(action.keys())[0]
-            # FIXME: install, upgrade, uninstall are things we care about
-            assert verb == "install", "Unknown verb {}".format(verb)
-
-            req_str_list = action[verb]
-            if isinstance(req_str_list, str):
-                req_str_list = [req_str_list]
-            assert isinstance(req_str_list, list) and all(
-                isinstance(x, str) for x in req_str_list
-            ), "requirements should be a string or list of strings"
-
-            try:
-                requirements = [Requirement(r) for r in req_str_list]
-            except InvalidRequirement:
-                raise YAMLException("Got invalid requirement in {}", req_str_list)
-            yield requirements, result
+            if verb == "install":
+                yield (
+                    self._compose_install_requirements(action[verb]),
+                    result
+                )
+            else:
+                raise Exception("Unknown verb.")
 
     def runtest(self):
         assert isinstance(self.spec, dict), "a test should be a dictionary"
@@ -56,40 +67,26 @@ class YamlFixtureItem(pytest.Item):
 
         # Create a Provider, using index
         provider = YAMLProvider(convert_index_to_candidates(self.spec["index"]))
-
         for requirements, expected in self._compose_requirements():
-            # Actual Testing Code
-            resolver = BackTrackingResolver(provider)
-            try:
-                result = resolver.resolve(requirements)
-            except CannotSatisfy as e:
-                result = e
-
+            result = self._run(requirements, provider)
             convert_result_and_expected_and_check(result, expected)
+
+    def _run(self, requirements, provider):
+        resolver = BackTrackingResolver(provider)
+        try:
+            result = resolver.resolve(requirements)
+        except CannotSatisfy as e:
+            result = e
+        return result
 
     # Called when the tests fail
     def repr_failure(self, excinfo):
         # type: (Any) -> str
-        if isinstance(excinfo.value, YAMLException):
-            # Format a reason
-            if not excinfo.value.args:
-                message = "unknown"
-            elif len(excinfo.value.args) == 1:
-                message = excinfo.value.args[0]
-            else:
-                try:
-                    message = excinfo.value.args[0].format(*excinfo.value.args[1:])
-                except Exception as error:
-                    message = "Unable to format message: {}\n{}".format(
-                        excinfo.value.args, error
-                    )
-            # Print the reason
-            return "YAML is malformed -- reason: {}".format(message)
-        elif isinstance(excinfo.value, AssertionError):
-            if excinfo.value.args:
-                msg = ": " + str(excinfo.value.args[0])
-            else:
-                msg = ""
+        error = excinfo.value
+        if isinstance(error, YAMLException):
+            return str(error)
+        elif isinstance(error, AssertionError):
+            msg = ": {}".format(error.args[0]) if error.args else ""
             return "assertion failed" + msg
         else:
             trace = traceback.format_exception(excinfo.type, excinfo.value, excinfo.tb)
@@ -102,7 +99,7 @@ class YamlFixtureItem(pytest.Item):
 class YamlFixtureFile(pytest.File):
 
     def _compose_tests(self, data):
-        assert isinstance(data, list), "test data should be a list"
+        _check_list(data, "test data")
         for i, item in enumerate(data):
             name = "{}[{}]".format(self.fspath.basename, i)
             yield YamlFixtureItem(name, self, item)
