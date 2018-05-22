@@ -31,82 +31,86 @@ def _make_req(string, item):
         raise YAMLException("Could not parse requirement {!r} from {!r}", string, item)
 
 
+def convert_index_string(item):
+    if "depends " not in item:
+        name_version = item
+        depends = []
+    else:
+        name_version, depends_str = _split_and_strip(item, ";", 1)
+        assert depends_str.startswith(
+            "depends "
+        ), "dependencies string must be specified with 'depends '"
+        depends = _split_and_strip(depends_str[len("depends ") :], "&")
+
+    name, version = _split_and_strip(name_version, " ", 1)
+    version = parse_version(version)
+    dependencies = {None: [_make_req(string, item) for string in depends]}
+
+    return YAMLCandidate(name, version, dependencies)
+
+
+def convert_index_dict(item):
+    assert "name" in item, "index-item is not named"
+    assert isinstance(item["name"], str), "index-item name is not a string"
+    name = item["name"]
+
+    assert "version" in item, "index-item is not versioned"
+    assert isinstance(
+        item["version"], str
+    ), "index-item version is not a string"
+    version = parse_version(item["version"])
+
+    # This is where we store information about dependencies of a
+    # package.
+    dependencies = {None: []}
+
+    if "depends" in item:
+        assert isinstance(item["depends"], list) and all(
+            isinstance(x, str) for x in item["depends"]
+        ), "index-item depends should be a List[str]"
+        dependencies[None] = [
+            _make_req(string, item) for string in item["depends"]
+        ]
+
+    # If there are any extras, add information about them to the
+    # dependencies dictionary.
+    if "extras" in item:
+        assert (
+            isinstance(item["extras"], dict)
+            and all(
+                isinstance(x[0], str) and isinstance(x[1], list)
+                for x in item["extras"].items()
+            )
+            and all(
+                all(isinstance(y, str) for y in x)
+                for x in item["extras"].values()
+            )
+        ), "index-item extras is not a Dict[str, List[str]]"
+
+        for key, value in item["extras"].items():
+            dependencies[key] = [_make_req(string, item) for string in value]
+
+    return YAMLCandidate(name, version, dependencies)
+
+
 def convert_index_to_candidates(index):
     assert isinstance(index, list), "index must be a list"
 
-    def _parse_index_item(item):
-        if isinstance(item, str):
-            if "depends " not in item:
-                name_version = item
-                depends = []
-            else:
-                name_version, depends_str = _split_and_strip(item, ";", 1)
-                assert depends_str.startswith(
-                    "depends "
-                ), "dependencies string must be specified with 'depends '"
-                depends = _split_and_strip(depends_str[len("depends ") :], "&")
-
-            name, version = _split_and_strip(name_version, " ", 1)
-            version = parse_version(version)
-            dependencies = {None: [_make_req(string, item) for string in depends]}
-
-            return YAMLCandidate(name, version, dependencies)
-
-        if isinstance(item, dict):
-            assert "name" in item, "index-item is not named"
-            assert isinstance(item["name"], str), "index-item name is not a string"
-            name = item["name"]
-
-            assert "version" in item, "index-item is not versioned"
-            assert isinstance(
-                item["version"], str
-            ), "index-item version is not a string"
-            version = parse_version(item["version"])
-
-            # This is where we store information about dependencies of a
-            # package.
-            dependencies = {None: []}
-
-            if "depends" in item:
-                assert isinstance(item["depends"], list) and all(
-                    isinstance(x, str) for x in item["depends"]
-                ), "index-item depends should be a List[str]"
-                dependencies[None] = [
-                    _make_req(string, item) for string in item["depends"]
-                ]
-
-            # If there are any extras, add information about them to the
-            # dependencies dictionary.
-            if "extras" in item:
-                assert (
-                    isinstance(item["extras"], dict)
-                    and all(
-                        isinstance(x[0], str) and isinstance(x[1], list)
-                        for x in item["extras"].items()
-                    )
-                    and all(
-                        all(isinstance(y, str) for y in x)
-                        for x in item["extras"].values()
-                    )
-                ), "index-item extras is not a Dict[str, List[str]]"
-
-                for key, value in item["extras"].items():
-                    dependencies[key] = [_make_req(string, item) for string in value]
-            return YAMLCandidate(name, version, dependencies)
-
-        assert False, "should never reach here"
+    # We will try to parse each item and update the corresponding entries in the
+    # candidate and dependency mappings.
+    candidates = {}
+    dependencies = {}
 
     # Create the list of candidates
     retval = defaultdict(list)
     for item in index:
-        candidate = _parse_index_item(item)
+        if isinstance(item, str):
+            candidate = convert_index_string(item)
+        elif isinstance(item, dict):
+            candidate = convert_index_dict(item)
+        else:
+            raise TypeError("Expected a string or dict.")
         retval[candidate.name].append(candidate)
-
-    # Shuffle the candidates so that we know that regardless of how the
-    # candidates are given, the resolver orders them properly using
-    # order_candidates.
-    for name in retval:
-        shuffle(retval[name])
 
     return retval
 
