@@ -3,7 +3,7 @@
 
 import pytest
 from packaging.requirements import Requirement
-from packaging.version import parse as parse_version
+from packaging.version import Version
 
 from tests.lib.yaml.abcs import YAMLCandidate, YAMLProvider
 
@@ -12,7 +12,7 @@ from tests.lib.yaml.abcs import YAMLCandidate, YAMLProvider
 def can(arg, extras=None):
     kwargs = {}
     kwargs["name"], kwargs["version"] = arg.split(" ")
-    kwargs["version"] = parse_version(kwargs["version"])
+    kwargs["version"] = Version(kwargs["version"])
 
     retval = YAMLCandidate(**kwargs)
     if extras is not None:
@@ -29,8 +29,8 @@ def assert_requirements_match(requirements_1, requirements_2):
     assert all(isinstance(i, Requirement) for i in requirements_1)
     assert all(isinstance(i, Requirement) for i in requirements_2)
 
-    requirements_strings_1 = [str(i) for i in requirements_1]
-    requirements_strings_2 = [str(i) for i in requirements_2]
+    requirements_strings_1 = sorted(str(i) for i in requirements_1)
+    requirements_strings_2 = sorted(str(i) for i in requirements_2)
 
     assert requirements_strings_1 == requirements_strings_2
 
@@ -72,7 +72,20 @@ class TestProvider(object):
     @pytest.mark.parametrize(
         ("candidate_info", "requirement", "expected"),
         [
-            ({"A": [can("A 1.0.0")]}, req("A"), [can("A 1.0.0")]),
+            (
+                {"A": [can("A 3.0.0"), can("A 2.0.0"), can("A 1.0.0")]},
+                req("A"),
+                [can("A 3.0.0"), can("A 2.0.0"), can("A 1.0.0")],
+            ),
+            (
+                {"A": [can("A 3.0.0"), can("A 2.0.0"), can("A 1.0.0")]},
+                req("A[extra]"),
+                [
+                    can("A 3.0.0", extras={"extra"}),
+                    can("A 2.0.0", extras={"extra"}),
+                    can("A 1.0.0", extras={"extra"}),
+                ],
+            ),
             (
                 {"A": [can("A 1.0.0")], "B": [can("B 1.0.0")]},
                 req("B"),
@@ -92,10 +105,11 @@ class TestProvider(object):
                 {
                     "A 2.0.0": [req("B")],
                     "A 1.0.0": [req("C")],
-                    "A 0.1.0": [req("D")],
+                    "A 0.2.0": [req("D")],
+                    "A 0.1.0": [req("E")],
                 },
                 can("A 1.0.0"),
-                [req("C")]
+                [req("C")],
             ),
             (
                 {
@@ -107,9 +121,27 @@ class TestProvider(object):
                 can("A 1.0.0", extras={"doc"}),
                 [req("A == 1.0.0"), req("four")],
             ),
+            (
+                {
+                    "A 1.0.0": [req("one")],
+                    "A[doc] 1.0.0": [req("two")],
+                    "A[test] 1.0.0": [req("three")],
+                },
+                can("A 1.0.0", extras={"doc", "test"}),
+                [req("A[doc] == 1.0.0"), req("A[test] == 1.0.0")],
+            ),
         ],
     )
     def test_gives_correct_dependencies(self, dependency_info, requirement, expected):
         provider = YAMLProvider({}, dependency_info)
 
         assert_requirements_match(provider.get_dependencies(requirement), expected)
+
+    # TODO: Add tests for installation
+    #       - double installs fail
+    #       - extras on installation are modified correctly
+    #       - extras installed are provided in returned candidate
+    #       - version mismatch
+    # TODO: Add tests for un-installation
+    #       - refuses to uninstall stuff that's not installed
+    #       - actually uninstalls stuff that's install

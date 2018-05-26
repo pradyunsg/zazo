@@ -14,13 +14,12 @@ class YAMLCandidate(Candidate):
         super(YAMLCandidate, self).__init__()
         self.name = name
         self.version = version
+
         self.extras = set()
 
     def __repr__(self):
-        return "<YAMLCandidate({!r}{}, {})>".format(
-            self.name,
-            ("[" + ",".join(self.extras) + "]" if self.extras else ""),
-            self.version,
+        return "<YAMLCandidate({}[{}], {!r})>".format(
+            self.name, ",".join(self.extras), self.version
         )
 
     def __eq__(self, other):
@@ -40,19 +39,24 @@ class YAMLCandidate(Candidate):
 
 class YAMLProvider(Provider):
 
-    def __init__(self, candidates, dependencies):
+    def __init__(self, candidates, dependencies, installed=None):
         super(YAMLProvider, self).__init__()
         self._candidates_by_name = candidates
         self._dependencies_by_candidate = dependencies
 
-    def get_candidates(self, requirement):
-        # Do a copy of the candidates, since we modify the candidates before
-        # returning them.
-        try:
-            candidates = deepcopy(self._candidates_by_name[requirement.name])
-        except KeyError:
-            return []
+        if installed is None:
+            installed = {}
 
+        self._installed = installed  # type: Dict[str, Tuple[Version, Extras]]
+
+    def get_candidates(self, requirement):
+        name = requirement.name
+
+        # Make a copy of the candidates
+        candidates = self._candidates_by_name.get(name, [])
+        candidates = deepcopy(candidates)
+
+        # Merge the extras
         for candidate in candidates:
             candidate.extras |= requirement.extras
 
