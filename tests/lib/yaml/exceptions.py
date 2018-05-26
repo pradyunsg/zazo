@@ -42,6 +42,8 @@ class AggregatedYAMLErrors(YAMLException):
     def __bool__(self):
         return bool(self._errors)
 
+    __nonzero__ = __bool__  # Python 2 stuff
+
     def add(self, error):
         if isinstance(error, AggregatedYAMLErrors):
             self._errors.extend(error._errors)
