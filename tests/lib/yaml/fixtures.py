@@ -12,74 +12,25 @@ from packaging.requirements import InvalidRequirement, Requirement
 from zazo.api import BackTrackingResolver, CannotSatisfy
 
 from .abcs import YAMLProvider
-from .convert import (
-    _check_list,
-    convert_index_to_candidates,
-    convert_result_and_expected_and_check,
-)
 from .exceptions import YAMLException
+from .expand import expand_shorthands
+from .translate import translate_specification
+from .verify import verify_installation_result
 
 
 class YamlFixtureItem(pytest.Item):
 
     def __init__(self, name, parent, spec):
-        # type: (str, Any, Any) -> None
         super(YamlFixtureItem, self).__init__(name, parent)
         self.spec = spec
 
-    def _compose_install_requirements(self, req_str_list):
-        if isinstance(req_str_list, str):
-            req_str_list = [req_str_list]
-
-        _check_list(req_str_list, "install:", str)
-
-        try:
-            requirements = [Requirement(r) for r in req_str_list]
-        except InvalidRequirement:
-            raise YAMLException("Got invalid requirement in {}", req_str_list)
-
-        return requirements
-
-    def _compose_requirements(self):
-        _check_list(self.spec["actions"], "actions")
-        _check_list(self.spec["results"], "results")
-
-        for action, result in zip(self.spec["actions"], self.spec["results"]):
-            assert isinstance(action, dict), "an action should be a dict"
-            assert len(action) == 1, "an action should have a single item"
-
-            verb = list(action.keys())[0]
-            if verb == "install":
-                yield (self._compose_install_requirements(action[verb]), result)
-            else:
-                raise Exception("Unknown verb.")
-
-    def runtest(self):
-        assert isinstance(self.spec, dict), "a test should be a dictionary"
-        assert "index" in self.spec, "there should be index in a test"
-        assert "actions" in self.spec, "there should be actions in a test"
-        assert "results" in self.spec, "there should be results in a test"
-
-        # Create a Provider, using index
-        candidates, dependencies = convert_index_to_candidates(self.spec["index"])
-        provider = YAMLProvider(candidates, dependencies)
-
-        # Look for all the checks.
-        for requirements, expected in self._compose_requirements():
-            result = self._run(requirements, provider)
-            convert_result_and_expected_and_check(result, expected)
-
-    def _run(self, requirements, provider):
-        resolver = BackTrackingResolver(provider)
-        try:
-            result = resolver.resolve(requirements)
-        except CannotSatisfy as e:
-            result = e
-        return result
+        self._actions = {
+            "install": (self._do_install, self._check_install),
+            "uninstall": (self._do_uninstall, self._check_uninstall),
+        }
 
     # Called when the tests fail
     def repr_failure(self, excinfo):
-        # type: (Any) -> str
         error = excinfo.value
         if isinstance(error, YAMLException):
             return str(error)
@@ -93,11 +44,85 @@ class YamlFixtureItem(pytest.Item):
     def reportinfo(self):
         return self.fspath, 0, "yaml-test: %s" % self.name
 
+    def runtest(self):
+        # Convert things into something usable.
+        expanded_spec = expand_shorthands(self.name, self.spec)
+        test_spec = translate_specification(self.name, expanded_spec)
+
+        # Create a Provider, using information
+        provider = YAMLProvider(test_spec["candidates"], test_spec["dependencies"])
+
+        for action, expected in test_spec["subtests"]:
+            result = self._perform_action(action, provider)
+            self._check_action_result(action, result, expected)
+
+    ###### Helpers ######
+    def _perform_action(self, action, provider):
+        verb = action["action"]
+        func = getattr(self, "_do_" + verb, None)
+        if func is None:
+            raise Exception("Can not perform verb {!r}.".format(verb))
+
+        return func(provider, action)
+
+    def _check_action_result(self, action, result, expected):
+        verb = action["action"]
+        func = getattr(self, "_check_" + verb, None)
+        if func is None:
+            raise Exception("Can not check verb {!r}.".format(verb))
+
+        func(result, expected)
+
+    ###### Actions ######
+    def _do_uninstall(self, provider, names):
+        # _check_list(names, "uninstall items", str)
+        provider.uninstall_names(names)
+
+    def _check_uninstall(self, result, expected):
+        assert result is None
+        assert expected == "tada"
+
+    def _do_install_prepare_reqs(self, action):
+        """Create a list of requirements from given items.
+        """
+
+        def _make_req(string):
+            try:
+                return Requirement(string)
+            except Exception:
+                raise YAMLException(
+                    "Could not parse requirement {!r} from {!r}",
+                    string,
+                    action["items"],
+                )
+
+        return [_make_req(r) for r in action["items"]]
+
+    def _do_install(self, provider, items):
+        """Compose a list of requirements and then run the resolver to install them.
+        """
+        requirements = self._do_install_prepare_reqs(items)
+        result = self._run_resolver(requirements, provider)
+
+        return result
+
+    def _check_install(self, result, expected):
+        verify_installation_result(result, expected)
+
+    def _run_resolver(self, requirements, provider):
+        resolver = BackTrackingResolver(provider)
+        try:
+            to_install = resolver.resolve(requirements)
+        except CannotSatisfy as e:
+            return e
+        else:
+            return to_install
+
 
 class YamlFixtureFile(pytest.File):
 
     def _compose_tests(self, data):
-        _check_list(data, "test data")
+        # _check_list(data, "test data")
         for i, item in enumerate(data):
             name = "{}[{}]".format(self.fspath.basename, i)
             yield YamlFixtureItem(name, self, item)
