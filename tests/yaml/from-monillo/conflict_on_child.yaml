@@ -1,8 +1,8 @@
 - name: resolves an index with conflict on child
   index:
-    - berkshelf 2.0.7; depends json >= 1.7.7
-    - chef 10.26; depends json <= 1.7.7, >= 1.4.4
-    - chef_app 1.0.0; depends berkshelf ~= 2.0 & chef ~= 10.26
+    - berkshelf 2.0.7 depends json >= 1.7.7
+    - chef 10.26 depends json <= 1.7.7, >= 1.4.4
+    - chef_app 1.0.0 depends berkshelf ~= 2.0 & chef ~= 10.26
     - json 1.6.5
     - json 1.7.7
     - json 1.8.0

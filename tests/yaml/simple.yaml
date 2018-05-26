@@ -12,9 +12,10 @@
       set:
       # we want it installing the latest version
       - A 2.0.0
+
 - name: Ensure candidate's unconditional dependencies are selected
   index:
-    - A 1.0.0; depends B
+    - A 1.0.0 depends B
     - B 1.0.0
     - E 1.0.0
   actions:
