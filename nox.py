@@ -43,7 +43,7 @@ def lint_session(func):
 @nox.session
 @lint_session
 def lint(session, files):
-    session.run("black", "--check", *files)
+    session.run("black", "--check", "--diff", *files)
     session.run("isort", "--check-only", "--diff", "--recursive", *files)
     session.run("mypy", "--ignore-missing-imports", "--check-untyped-defs", "zazo")
     session.run(
