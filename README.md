@@ -1,8 +1,9 @@
 # zazo
 
 [![Build Status](https://travis-ci.org/pradyunsg/zazo.svg?branch=master)](https://travis-ci.org/pradyunsg/zazo)
+[![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 
-A Pluggable Dependency Resolver written in Python. Intended for bringing dependency resolution to pip.
+An extensible Dependency Resolver, written in Python. Intended for bringing dependency resolution to pip.
 
 ## Motivation
 
