@@ -22,7 +22,6 @@ def packaging(session):
 
 
 def lint_session(func):
-
     @functools.wraps(func)
     def wrapped(session):
         if session.posargs:

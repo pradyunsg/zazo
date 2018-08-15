@@ -9,7 +9,6 @@ from zazo.api import Candidate, Provider
 
 
 class YAMLCandidate(Candidate):
-
     def __init__(self, name, version):
         super(YAMLCandidate, self).__init__()
         self.name = name
@@ -38,7 +37,6 @@ class YAMLCandidate(Candidate):
 
 
 class YAMLProvider(Provider):
-
     def __init__(self, candidates, dependencies, installed=None):
         super(YAMLProvider, self).__init__()
         self._candidates_by_name = candidates

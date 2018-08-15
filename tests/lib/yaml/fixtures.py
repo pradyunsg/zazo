@@ -19,7 +19,6 @@ from .verify import verify_installation_result
 
 
 class YamlFixtureItem(pytest.Item):
-
     def __init__(self, name, parent, spec):
         super(YamlFixtureItem, self).__init__(name, parent)
         self.spec = spec
@@ -120,7 +119,6 @@ class YamlFixtureItem(pytest.Item):
 
 
 class YamlFixtureFile(pytest.File):
-
     def _compose_tests(self, data):
         # _check_list(data, "test data")
         for i, item in enumerate(data):

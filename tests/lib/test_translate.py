@@ -13,7 +13,6 @@ from tests.lib.yaml.exceptions import MalformedYAML, YAMLException
 # XXX: This is a hack for working around the fact that packaging's Requirement doesn't
 #      have equality checking.
 class Requirement(_Requirement):
-
     def __eq__(self, other):
         return str(self) == str(other)
 

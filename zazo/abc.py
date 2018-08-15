@@ -14,7 +14,6 @@ if False:
 
 @add_metaclass(abc.ABCMeta)
 class Candidate(object):
-
     @abc.abstractmethod
     def matches(self, requirement):
         # type: (Requirement) -> bool

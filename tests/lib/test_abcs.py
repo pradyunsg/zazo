@@ -36,7 +36,6 @@ def assert_requirements_match(requirements_1, requirements_2):
 
 
 class TestCandidate(object):
-
     @pytest.mark.parametrize(
         ("candidate", "requirement", "should_match"),
         [
@@ -68,7 +67,6 @@ class TestCandidate(object):
 
 
 class TestProvider(object):
-
     @pytest.mark.parametrize(
         ("candidate_info", "requirement", "expected"),
         [

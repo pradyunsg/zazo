@@ -26,7 +26,6 @@ def _create_key(req):
 
 
 class BackTrackingResolver(object):
-
     def __init__(self, provider):
         # type: (Provider) -> None
         super(BackTrackingResolver, self).__init__()
@@ -74,17 +73,14 @@ class BackTrackingResolver(object):
         candidates = self.provider.get_candidates(req)
         for candidate in candidates:
             assert candidate.matches(req), (
-                "candidate does not match requirement it was guaranteed "
-                "to match"
+                "candidate does not match requirement it was guaranteed " "to match"
             )
 
             graph[req_key] = candidate
             deps = self.provider.get_dependencies(candidate)
             try:
                 # XXX: This causes a peak in memory usage.
-                retval = self._resolve(
-                    deps + requirements, graph.copy()
-                )
+                retval = self._resolve(deps + requirements, graph.copy())
             except CannotSatisfy:
                 assert graph[req_key] == candidate
                 del graph[req_key]
