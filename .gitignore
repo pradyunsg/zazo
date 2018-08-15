@@ -12,7 +12,7 @@ dist/
 *.egg-info/
 
 # Unit test / coverage reports
-.nox/
+.tox/
 .*cache/
 .hypothesis/
 
