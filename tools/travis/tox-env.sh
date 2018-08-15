@@ -14,3 +14,6 @@ if [[ -z "$TOXENV" ]]; then
     fi
 fi
 echo "TOXENV=${TOXENV}"
+
+set +x
+set +e
