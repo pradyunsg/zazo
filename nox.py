@@ -35,10 +35,3 @@ def packaging(session):
 
     session.run("check-manifest")
     session.run("python", "setup.py", "check", "-m", "-s")
-
-
-@nox.session(python=["2.7", "3.4", "3.5", "3.6", "3.7", "3.8", "pypy", "pypy3"])
-def test(session):
-    session.install("-r", "tools/reqs/test.txt")
-    session.install("-e", ".")
-    session.run("pytest")

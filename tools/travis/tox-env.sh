@@ -3,7 +3,7 @@ set -x
 set -e
 
 echo "Determining correct TOXENV..."
-if [[ -z "$TOXENV" ]]; then
+if [[ -z "$TOXENV" || -z "$SESSION" ]]; then
     if [[ ${TRAVIS_PYTHON_VERSION} == pypy* ]]; then
         export TOXENV=${TRAVIS_PYTHON_VERSION}
     else

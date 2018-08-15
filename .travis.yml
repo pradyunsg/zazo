@@ -4,9 +4,9 @@ python: 3.6
 matrix:
   include:
     # Code Quality Checks
-    - env: TOXENV=lint
-    - env: TOXENV=docs
-    - env: TOXENV=packaging
+    - env: SESSION=lint
+    - env: SESSION=docs
+    - env: SESSION=packaging
 
     # Test Suite
     - python: pypy3
@@ -33,4 +33,4 @@ before_script:
   - source ./tools/travis/tox-env.sh
 
 script:
-  - tox
+  - '[[ -z "$SESSION" ]] && tox || nox -s $SESSION'
