@@ -21,17 +21,17 @@ matrix:
     - python: 3.5
     - python: 3.4
 
-    - python: nightly
+    - python: 3.8-dev
       env: KIND=test
 
   allow_failures:
-    - python: nightly
+    - python: 3.8-dev
 
 install:
-  - pip install --upgrade --pre nox-automation
-  - ./tools/travis/install.sh
+  - pip install --upgrade tox
 
 before_script:
-  - export SESSION="${KIND:-test-${TRAVIS_PYTHON_VERSION}}"
+  - source ./tools/travis/tox-env.sh
+
 script:
-  - nox -s $SESSION
+  - tox
