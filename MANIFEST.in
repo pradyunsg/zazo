@@ -1,0 +1,14 @@
+include LICENSE
+include NEWS.md
+include README.md
+include pyproject.toml
+
+exclude .travis.yml
+exclude tox.ini
+exclude .isort.cfg
+
+recursive-include docs *.rst *.py
+
+prune docs/build
+prune tests
+prune tools
