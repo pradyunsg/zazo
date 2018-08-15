@@ -30,6 +30,11 @@ def lint_session(func):
             files = LINT_ITEMS
         session.install("--pre", "-r", "tools/reqs/lint.txt")
 
+        # We'll install our actual dependencies for installation here; instead of
+        # depending on flit or pip to install (because we can't)
+        session.install("flit")
+        session.run("flit", "install")
+
         session.run("black", "--version")
         session.run("isort", "--version")
         session.run("mypy", "--version")
@@ -44,10 +49,11 @@ def lint_session(func):
 def lint(session, files):
     session.run("black", "--check", "--diff", *files)
     session.run("isort", "--check-only", "--diff", "--recursive", *files)
-    session.run("mypy", "--ignore-missing-imports", "--check-untyped-defs", "zazo")
-    session.run(
-        "mypy", "-2", "--ignore-missing-imports", "--check-untyped-defs", "zazo"
-    )
+    # NOTE: Added ignore-missing-imports here since packaging doesn't have type
+    #       annotations. Would be a good thing to do, since that'd allow to be
+    #       strict here.
+    session.run("mypy", "--strict", "--ignore-missing-imports", "zazo")
+    session.run("mypy", "--strict", "--ignore-missing-imports", "-2", "zazo")
 
 
 @nox.session
@@ -60,14 +66,8 @@ def format(session, files):
 @nox.session(python=["2.7", "3.4", "3.5", "3.6", "3.7", "3.8", "pypy", "pypy3"])
 def test(session):
     session.install("flit")
-    session.run("python3", "-m", "flit", "build")
+    session.run("flit", "install")
 
-    files = glob.glob("./dist/*.whl")
-    if not files:
-        session.error("Could not find any built wheels.")
-
-    # Install the package and test dependencies.
-    session.install(*files)
     session.install("-r", "tools/reqs/test.txt")
 
     # Run the tests

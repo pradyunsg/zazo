@@ -17,7 +17,8 @@ logger = logging.getLogger()
 
 
 def _create_key(req):
-    parts = [req.name]
+    # type: (Requirement) -> str
+    parts = [req.name]  # type: List[str]
 
     if req.extras:
         parts.append("[{0}]".format(",".join(sorted(req.extras))))
@@ -48,7 +49,7 @@ class BackTrackingResolver(object):
     # TODO: Figure out feasibility of blacklisting of known conflicts, like
     #       Stork.
     def _resolve(self, requirements, graph):
-        # type: (List[Requirement], Graph, Any) -> Graph
+        # type: (List[Requirement], Graph) -> Graph
         if not requirements:
             return graph
 
