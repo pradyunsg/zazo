@@ -4,9 +4,9 @@ python: 3.6
 matrix:
   include:
     # Code Quality Checks
-    - env: KIND=lint
-    - env: KIND=docs
-    - env: KIND=packaging
+    - env: TOXENV=lint
+    - env: TOXENV=docs
+    - env: TOXENV=packaging
 
     # Test Suite
     - python: pypy3
@@ -22,7 +22,6 @@ matrix:
     - python: 3.4
 
     - python: 3.8-dev
-      env: KIND=test
 
   allow_failures:
     - python: 3.8-dev
