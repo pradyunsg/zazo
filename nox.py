@@ -57,7 +57,7 @@ def format(session, files):
     session.run("isort", "--recursive", *files)
 
 
-@nox.session(python=["2.7", "3.4", "3.5", "3.6", "3.7", "pypy", "pypy3"])
+@nox.session(python=["2.7", "3.4", "3.5", "3.6", "3.7", "3.8", "pypy", "pypy3"])
 def test(session):
     session.install("flit")
     session.run("python3", "-m", "flit", "build")

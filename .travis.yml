@@ -1,24 +1,28 @@
 language: python
+python: 3.6
 
 matrix:
   include:
     # Code Quality Checks
     - env: KIND=lint
-      python: 3.6
     - env: KIND=docs
-      python: 3.6
     - env: KIND=packaging
-      python: 3.6
 
     # Test Suite
     - python: pypy3
     - python: pypy
+
     - python: 2.7
+    - python: 3.7
+      sudo: required
+      dist: xenial
+
     - python: 3.6
     - python: 3.5
     - python: 3.4
+
     - python: nightly
-      env: KIND="test(python_version='3.7')"
+      env: KIND=test
 
   allow_failures:
     - python: nightly
@@ -26,7 +30,8 @@ matrix:
 install:
   - pip install --upgrade nox-automation
   - ./tools/travis/install.sh
+
 before_script:
-  - export SESSION="${KIND:-test(python_version="'"${TRAVIS_PYTHON_VERSION}"'")}"
+  - export SESSION="${KIND:-test-${TRAVIS_PYTHON_VERSION}}"
 script:
   - nox -s $SESSION
