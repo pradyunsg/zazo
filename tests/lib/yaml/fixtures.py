@@ -25,7 +25,6 @@ class YamlFixtureItem(pytest.Item):
 
         self._actions = {
             "install": (self._do_install, self._check_install),
-            "uninstall": (self._do_uninstall, self._check_uninstall),
         }
 
     # Called when the tests fail
@@ -71,15 +70,6 @@ class YamlFixtureItem(pytest.Item):
             raise Exception("Can not check verb {!r}.".format(verb))
 
         func(result, expected)
-
-    ###### Actions ######
-    def _do_uninstall(self, provider, names):
-        # _check_list(names, "uninstall items", str)
-        provider.uninstall_names(names)
-
-    def _check_uninstall(self, result, expected):
-        assert result is None
-        assert expected == "tada"
 
     def _do_install_prepare_reqs(self, action):
         """Create a list of requirements from given items.
