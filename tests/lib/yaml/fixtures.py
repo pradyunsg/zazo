@@ -23,9 +23,7 @@ class YamlFixtureItem(pytest.Item):
         super(YamlFixtureItem, self).__init__(name, parent)
         self.spec = spec
 
-        self._actions = {
-            "install": (self._do_install, self._check_install),
-        }
+        self._actions = {"install": (self._do_install, self._check_install)}
 
     # Called when the tests fail
     def repr_failure(self, excinfo):

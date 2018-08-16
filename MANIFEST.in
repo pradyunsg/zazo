@@ -4,6 +4,7 @@ include README.md
 include pyproject.toml
 
 exclude .travis.yml
+exclude nox.py
 exclude tox.ini
 exclude .isort.cfg
 
