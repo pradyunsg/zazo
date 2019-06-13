@@ -21,4 +21,10 @@ This project uses nox extensively.
 
 Currently, the documentation of this project is non-existent but this shall be rectified once the actual internal details of the package stabilize.
 
+## Relationship with PyPA
+
+This project (or the equivalent [resolvelib]) will move into the [PyPA Umberella][pypa] once it matures.
+
 [GSoC Project]: https://summerofcode.withgoogle.com/archive/2017/projects/5797394100781056/
+[resolvelib]: https://github.com/sarugaku/resolvelib
+[pypa]: https://github.com/pypa
